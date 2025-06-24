@@ -81,6 +81,7 @@ class DepartureController extends Controller
         $departure->update($validated);
         return response()->json([
             'success' => true,
+            'message'=> "Departure Detail Updated Successfully",
             'data' => $departure
         ]);
        }catch(Exception $e){

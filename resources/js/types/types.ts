@@ -113,3 +113,27 @@ export interface SharedProps extends PageProps {
         APP_URL: string;
     };
 }
+
+export interface PopularInfo{
+    id: number, 
+    name: string,
+    count: string
+}
+
+export interface BookingGraphData{
+    label: string,
+    Bookings: number
+}
+
+export interface User {
+    account_status:string;
+    address: string;
+    created_at: string;
+    email: string;
+    full_name: string;
+    id: number;
+    isAdmin: number; 
+    phone: string;
+    profile_picture: string;
+    updated_at: string;
+  }

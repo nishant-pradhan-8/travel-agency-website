@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('profile_picture')->nullable();
             $table->boolean('isAdmin')->default(false);
+            $table->enum('account_status',['active','blocked'])->default('active');
             $table->rememberToken();
             $table->timestamps();
         });

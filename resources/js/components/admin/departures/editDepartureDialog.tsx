@@ -12,6 +12,8 @@ import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import * as React from 'react';
 
+import { useAppContext } from '@/contexts/appContext';
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2),
@@ -44,14 +46,24 @@ export default function DepartureEditDialog({
     setDepartureHistory: React.Dispatch<React.SetStateAction<Departure[]>>;
     packageList:info[] | null;
 }) {
-    const { env } = usePage<SharedProps>().props;
+    console.log(departure)
+    const {APP_URL} = useAppContext();
     
 
     const [updateDetails, setUpdateDetails] = React.useState<EditDeparture>({
-        departure_date: departure.departure_date || '',
-        package_id: departure.package_id || 0,
-        available_slots: departure.available_slots || 0,
+        departure_date: '',
+        package_id: 0,
+        available_slots: 0,
     });
+
+    // Reset updateDetails when departure prop changes
+    React.useEffect(() => {
+        setUpdateDetails({
+            departure_date: departure.departure_date || '',
+            package_id: departure.package_id || 0,
+            available_slots: departure.available_slots || 0,
+        });
+    }, [departure]);
 
     const handleSelectChange = (event: SelectChangeEvent<string | number>) => {
         const { name, value } = event.target;
@@ -75,8 +87,7 @@ export default function DepartureEditDialog({
             reqBody['available_slots'] = updateDetails.available_slots;
         }
 
-        axios
-            .patch(`${env.APP_URL}:8000/api/departure/${departure.id}`, reqBody)
+        axios.patch(`${APP_URL}/api/departure/${departure.id}`, reqBody)
             .then(function (res) {
                 const updatedDepartureHistory = departureHistory.map((dep) => {
                     if (departure.id === dep.id) {
@@ -86,12 +97,13 @@ export default function DepartureEditDialog({
                 });
                 setDepartureHistory(updatedDepartureHistory);
                 window.alert(res.data.message);
+                
+        handleClose();
             })
             .catch(function (err) {
-                window.alert(err.response.data.message);
+                window.alert(err.response.data.message || "Unexpected Error Occurred");
             });
 
-        handleClose();
     };
 
     return (

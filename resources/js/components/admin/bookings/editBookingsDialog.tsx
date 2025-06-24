@@ -11,21 +11,8 @@ import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import * as React from 'react';
-// Demo data
-const packages = [
-    { id: 1, name: 'Everest Base Camp Trek' },
-    { id: 2, name: 'Annapurna Circuit' },
-    { id: 3, name: 'Langtang Valley Trek' },
-];
 
-const departureDates = [
-    { id: 1, date: '2024-04-01', packageId: 1 },
-    { id: 2, date: '2024-04-15', packageId: 1 },
-    { id: 3, date: '2024-05-01', packageId: 2 },
-    { id: 4, date: '2024-05-15', packageId: 2 },
-    { id: 5, date: '2024-06-01', packageId: 3 },
-];
-
+import { useAppContext } from '@/contexts/appContext';
 const paymentStatuses = ['unpaid', 'paid', 'refunded'];
 const bookingStatuses = ['booked', 'cancelled'];
 
@@ -57,7 +44,7 @@ export default function BookingEditDialog({
     bookingHistory: BookingHistory[];
     setBookingHistory: React.Dispatch<React.SetStateAction<BookingHistory[]>>;
 }) {
-    const { env } = usePage<SharedProps>().props;
+    const {APP_URL} = useAppContext();
 
     const [updateDetails, setUpdateDetails] = React.useState<EditBooking>({
         payment_status: booking.payment_status || '',
@@ -79,24 +66,33 @@ export default function BookingEditDialog({
         }
 
         axios
-            .patch(`${env.APP_URL}:8000/api/booking/${booking.id}`, reqBody)
+            .patch(`${APP_URL}/api/booking/${booking.id}`, reqBody)
             .then(function (res) {
                 const updatedBookingHistory: BookingHistory[] = bookingHistory.map((book) => {
                     if (booking.id === book.id) {
-                        return { ...booking, payment_status: updateDetails['payment_status'], booking_status: updateDetails['booking_status'] };
+                        return { ...booking, ...updateDetails};
                     }
                     return book;
                 });
                 setBookingHistory(updatedBookingHistory);
+              
                 window.alert(res.data.message);
             })
             .catch(function (err) {
                 window.alert(err.response.data.message);
-            });
+            }).finally(()=>{
+                handleClose();
+            })
 
-        handleClose();
+     
     };
 
+    React.useEffect(()=>{
+        setUpdateDetails({
+            payment_status: booking.payment_status || '',
+            booking_status: booking.booking_status || '',
+        });
+    },[booking])
     return (
         <React.Fragment>
             <BootstrapDialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open} maxWidth="sm" fullWidth>

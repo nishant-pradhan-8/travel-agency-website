@@ -6,6 +6,9 @@ use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\DepartureController;
+use App\Http\Controllers\DashboardController;
+
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -22,14 +25,13 @@ Route::get('/booking-history', [BookingController::class, 'show'])->name('bookin
 
 
 Route::prefix('admin')->group(function () {
-  Route::get('/dashboard', function () {
-    return Inertia::render('admin/home');
-  })->name('admin.dashboard');
+  Route::get('/dashboard',[DashboardController::class, 'index'])->name('admin.dashboard');
   Route::get('/bookings', [BookingController::class, 'index'])->name('admin.bookings');
   Route::get('/destinations', [DestinationController::class, 'index'])->name('admin.destinations');
   Route::get('/activities', [ActivityController::class, 'index'])->name('admin.activities');
   Route::get('/packages', [PackageController::class, 'index'])->name('admin.packages');
   Route::get('/departures', [DepartureController::class, 'index'])->name('admin.departures');
+  Route::get('/users',[UserController::class,'index'])->name('admin.users');
 });
 
 

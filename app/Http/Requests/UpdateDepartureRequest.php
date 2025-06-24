@@ -24,7 +24,7 @@ class UpdateDepartureRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'package_id'=>'sometimes | numeric | exists:package_id',
+            'package_id'=>'sometimes | numeric | exists:package,id',
             'departure_date' => 'sometimes  | date',
             'available_slots'=>'sometimes | numeric | min:0'
         ];

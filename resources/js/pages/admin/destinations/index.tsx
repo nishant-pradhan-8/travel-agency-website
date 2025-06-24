@@ -11,7 +11,7 @@ import axios from 'axios';
 
 export default function Destinations({ destinations }: { destinations: destination[] }) {
     const { env } = usePage<SharedProps>().props;
-    const [newDestinations, setNewDestinations] = useState<destination[]>(destinations);
+    const [newDestinations, setNewDestinations] = useState<destination[]>(destinations.sort((a,b)=>new Date(b.created_at).getDate() - new Date(a.created_at).getDate()));
     const [selectedDestination, setSelectedDestination] = useState<destination | undefined>();
     const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
     const { open, handleClickOpen, handleClose } = useDialog();
@@ -30,7 +30,7 @@ export default function Destinations({ destinations }: { destinations: destinati
 
     const handleSaveDestination = (updatedDestination: destination) => {
         if (dialogMode === 'create') {
-            setNewDestinations([...newDestinations, updatedDestination]);
+            setNewDestinations([updatedDestination,...newDestinations]);
         } else {
             setNewDestinations(newDestinations.map(dest => 
                 dest.id === updatedDestination.id ? updatedDestination : dest
@@ -40,7 +40,7 @@ export default function Destinations({ destinations }: { destinations: destinati
 
     const handleDestinationDelete = (destinationToDelete: destination) => {
         axios
-            .delete(`${env.APP_URL}:8000/api/destination/${destinationToDelete.id}`)
+            .delete(`${env.APP_URL}/api/destination/${destinationToDelete.id}`)
             .then(function (res) {
                 setNewDestinations(newDestinations.filter(dest => dest.id !== destinationToDelete.id));
                 window.alert(res.data.message);

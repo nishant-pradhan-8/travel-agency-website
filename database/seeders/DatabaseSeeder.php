@@ -19,13 +19,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
+        User::factory(20)->create();
         Destination::factory(5)->create();
     Activity::factory(5)->create();
 
     Package::factory(10)->create();
-    Departure::factory(15)->create();
-    Booking::factory(20)->create();
+    Departure::factory(50)->create();
+    Booking::factory(100)->create();
     Review::factory(30)->create();
        
     }

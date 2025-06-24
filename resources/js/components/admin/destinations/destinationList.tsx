@@ -24,14 +24,14 @@ const DestinationCard: React.FC<DestinationCardProps> = ({ destination, onEdit, 
         <div className="flex gap-2">
           <button 
             onClick={() => onEdit(destination)}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-2 cursor-pointer text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             title="Edit destination"
           >
             <FaEdit size={20} />
           </button>
           <button 
             onClick={handleDelete}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-2 cursor-pointer text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             title="Delete destination"
           >
             <FaTrash size={20} />

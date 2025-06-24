@@ -5,7 +5,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, 
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import React from 'react';
-
+import { useAppContext } from '@/contexts/appContext';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -29,20 +29,25 @@ interface ActivityDialogProps {
 }
 
 const ActivityDialog: React.FC<ActivityDialogProps> = ({ open, onClose, mode, activity, onSave }) => {
-  const { env } = usePage<SharedProps>().props;
+  const {APP_URL} = useAppContext();
   const [formData, setFormData] = React.useState<ActivityFormData>({
     name: activity?.name || '',
     description: activity?.description || '',
   });
 
   React.useEffect(() => {
-    if (activity) {
+    if (mode === "edit" && activity) {
       setFormData({
         name: activity.name,
         description: activity.description,
       });
-    }
-  }, [activity]);
+    }else if (mode === "create") {
+      setFormData({
+          name: '',
+          description: '',
+      });
+  }
+  }, [activity, mode]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -55,7 +60,7 @@ const ActivityDialog: React.FC<ActivityDialogProps> = ({ open, onClose, mode, ac
   const handleSubmit = () => {
     if (mode === 'create') {
       axios
-        .post(`${env.APP_URL}:8000/api/activity`, formData, {
+        .post(`${APP_URL}/api/activity`, formData, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -80,7 +85,7 @@ const ActivityDialog: React.FC<ActivityDialogProps> = ({ open, onClose, mode, ac
 
       if (Object.keys(reqBody).length > 0) {
         axios
-          .patch(`${env.APP_URL}:8000/api/activity/${activity?.id}`, reqBody, {
+          .patch(`${APP_URL}/api/activity/${activity?.id}`, reqBody, {
             headers: {
               'Content-Type': 'application/json',
             },

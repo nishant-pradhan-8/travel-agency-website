@@ -23,7 +23,7 @@ import { PageProps } from "@inertiajs/core";
 import axios from "axios";
 import { SharedProps } from "@/types/types";
 import { FaCamera } from "react-icons/fa";
-
+import { useAppContext } from '@/contexts/appContext';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -43,17 +43,6 @@ interface PackageDialogProps {
   mode: 'create' | 'edit' |'view';
 }
 
-interface FormData {
-  id: number;
-  name: string;
-  description: string;
-  image: string | File;
-  price: string;
-  discount: number;
-  duration: string;
-  destination_id: number;
-  activity_id: number;
-}
 
 const PackageDialog: React.FC<PackageDialogProps> = ({ 
   open, 
@@ -64,7 +53,8 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
   activities,
   mode
 }) => {
-  const { env } = usePage<SharedProps>().props;
+const {APP_URL} = useAppContext();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<Partial<Package>>({
     name: '',
@@ -183,14 +173,15 @@ const PackageDialog: React.FC<PackageDialogProps> = ({
         <div className="grid grid-cols-2 gap-4 mt-4">
           <div className="col-span-2">
             <div 
-              className={`w-full h-48 bg-gray-100 rounded-lg overflow-hidden relative ${isEditMode ? 'cursor-pointer' : ''}`}
+              className={`w-full h-48  bg-gray-100 rounded-lg overflow-hidden relative ${isEditMode ? 'cursor-pointer' : ''}`}
               onClick={handleImageClick}
             >
+              <div className={`overlay  bg-[#8080809e] absolute top-0 left-0 w-full h-full ${isEditMode && 'hidden'}`}></div>
               {formData.image ? (
                 <img 
               
            src={previewImg?previewImg:typeof formData.image === 'string'
-      ? `${env.APP_URL}:8000/storage/${formData.image}`
+      ? `${APP_URL}/storage/${formData.image}`
       : ''}
                   alt="Package preview" 
                   className="w-full h-full object-cover"

@@ -13,7 +13,13 @@ import { Link, usePage } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 import DepartureBoardIcon from '@mui/icons-material/DepartureBoard';
 
+import Person2Icon from '@mui/icons-material/Person2';
 const navigation = [
+ 
+  {
+    kind: 'header',
+    title: 'Travel',
+  },
   {
     segment: 'admin/dashboard',
     title: 'Dashboard',
@@ -51,29 +57,13 @@ const navigation = [
   },
   {
     kind: 'header',
-    title: 'Analytics',
+    title: 'Customer',
   },
+
   {
-    segment: 'admin/reports',
-    title: 'Reports',
-    icon: <BarChartIcon />,
-    children: [
-      {
-        segment: 'admin/reports/sales',
-        title: 'Sales',
-        icon: <DescriptionIcon />,
-      },
-      {
-        segment: 'admin/reports/traffic',
-        title: 'Traffic',
-        icon: <DescriptionIcon />,
-      },
-    ],
-  },
-  {
-    segment: 'admin/integrations',
-    title: 'Integrations',
-    icon: <LayersIcon />,
+    segment: 'admin/users',
+    title: 'Customers',
+    icon: <Person2Icon />,
   },
 ];
 
@@ -148,26 +138,7 @@ export default function DashboardLayoutBasic(props: Props) {
                   {isOpen && item.title}
                 </Link>
                 
-                {item.children && isOpen && (
-                  <div className="ml-4">
-                    {item.children.map((child, childIndex) => {
-                      const isChildActive = url.startsWith(`/${child.segment}`);
-                      return (
-                        <Link
-                          key={childIndex}
-                          href={`/${child.segment}`}
-                          className={cn(
-                            "flex items-center px-4 py-2 text-sm",
-                            isChildActive ? "bg-gray-800 text-white" : "text-gray-300 hover:bg-gray-800 hover:text-white"
-                          )}
-                        >
-                          <span className="mr-3">{child.icon}</span>
-                          {child.title}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+               
               </div>
             );
           })}

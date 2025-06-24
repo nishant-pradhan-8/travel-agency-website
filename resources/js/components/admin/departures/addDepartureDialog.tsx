@@ -59,7 +59,7 @@ export default function AddDepartureDialog({
     };
 
     const handleSubmit = () => {
-        console.log('clicked')
+       
         axios
             .post(`${APP_URL}/api/departure`, newDeparture)
             .then(function (res) {

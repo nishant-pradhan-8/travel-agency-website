@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ActivityController;
+use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\DepartureController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\DestinationController;
@@ -19,3 +20,8 @@ Route::resource('activity', ActivityController::class)->only(['index', 'store', 
 Route::resource('package', PackageController::class)->only(['index', 'store', 'update','destroy']);
 
 Route::resource('departure', DepartureController::class)->only(['index', 'store', 'update','destroy']);
+
+Route::get('/analytics/{timeFrame}', [AnalyticsController::class,'bookingAnalytics']);
+
+
+Route::resource('user', [UserController::class,'bookingAnalytics']);

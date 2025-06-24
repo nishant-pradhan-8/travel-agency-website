@@ -8,7 +8,7 @@ export default function BookingDetails({packageInfo}:{packageInfo:Package}){
   const [groupDiscount, setGroupDiscount] = useState<number>(0);
   const [totalCost, setTotalCost] = useState<number>(Number(packageInfo.price));
 
-  // Calculate group discount based on number of people
+
   function calcGroupDiscount(people: number): number {
     if (people <= 1) return 0;
     if (people === 2) return 20;

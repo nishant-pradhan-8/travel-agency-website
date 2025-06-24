@@ -13,26 +13,25 @@ use Illuminate\Support\Facades\Storage;
 
 class PackageController extends Controller
 {
-/**
+    /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        try{
+        try {
             $packages = Package::all();
             return response()->json([
-                "success"=>true,
-                "message"=> "Packages Fetched Successfully",
-                "data"=> PackageResource::collection($packages),
-              
-                
+                "success" => true,
+                "message" => "Packages Fetched Successfully",
+                "data" => PackageResource::collection($packages),
+
+
             ]);
-            
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
-                "success"=>false,
-                "message"=> "Unable to get Packages",
-                "error"=> $e->getMessage()
+                "success" => false,
+                "message" => "Unable to get Packages",
+                "error" => $e->getMessage()
             ]);
         }
     }
@@ -87,45 +86,39 @@ class PackageController extends Controller
 
     {
 
-         $validated = $request->validated();
-        return response()->json([
-            "data"=>$validated
-        ])
-  
-       ;/*
-  try {
-        if ($request->hasFile('image')) {
-            unset($validated['image']);
-        }
-
-        $package->update($validated); 
-
-     
-        if ($request->hasFile('image')) {
-
-            if ($package->image && Storage::disk('public')->exists($package->image)) {
-                Storage::disk('public')->delete($package->image);
+       $validated = $request->validated();
+        try {
+            if ($request->hasFile('image')) {
+                unset($validated['image']);
             }
-            $extension = $request->file('image')->getClientOriginalExtension();
-            $fileName = $package->name . '-' . $package->id . '.' . $extension;
-            $path = $request->file('image')->storeAs('package_image', $fileName, 'public');
-            $package->image = $path;
-            $package->save();
-        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Package updated successfully.',
-            'data' => $package
-        ]);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'An internal server error occurred while updating Package. Please try again.'
-        ], 500);
+            $package->update($validated);
+
+
+            if ($request->hasFile('image')) {
+
+                if ($package->image && Storage::disk('public')->exists($package->image)) {
+                    Storage::disk('public')->delete($package->image);
+                }
+                $extension = $request->file('image')->getClientOriginalExtension();
+                $fileName = $package->name . '-' . $package->id . '.' . $extension;
+                $path = $request->file('image')->storeAs('package_image', $fileName, 'public');
+                $package->image = $path;
+                $package->save();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Package updated successfully.',
+                'data' => $package
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An internal server error occurred while updating Package. Please try again.'
+            ], 500);
+        }
     }
-        */
-}
 
 
     /**
@@ -135,6 +128,9 @@ class PackageController extends Controller
     {
         try {
             $package->delete();
+            if(Storage::disk('public')->exists($package->image)) {
+                Storage::disk('public')->delete($package->image);
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'Destination deleted Successfully.'

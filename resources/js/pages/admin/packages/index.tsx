@@ -8,9 +8,10 @@ import { Button, InputAdornment, TextField } from '@mui/material';
 import axios from 'axios';
 import { Plus, Search } from 'lucide-react';
 import { ReactNode, useState } from 'react';
+import { useAppContext } from '@/contexts/appContext';
 
 export default function Packages({ packages }: { packages: PackageWithRelations[] }) {
-    const { env } = usePage<SharedProps>().props;
+    const {APP_URL} = useAppContext();
     const { open, handleClickOpen, handleClose } = useDialog();
     const [packageList, setPackageList] = useState<PackageWithRelations[]>(
         [...packages].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
@@ -22,9 +23,10 @@ export default function Packages({ packages }: { packages: PackageWithRelations[
 
     const getAdditionalInfo = async () => {
         try {
+
             const [destinationsRes, activitiesRes] = await Promise.all([
-                axios.get(`${env.APP_URL}:8000/api/destination`),
-                axios.get(`${env.APP_URL}:8000/api/activity`),
+                axios.get(`${APP_URL}/api/destination`),
+                axios.get(`${APP_URL}/api/activity`),
             ]);
 
             const destinations: Partial<info[]> = destinationsRes.data.data;
@@ -37,8 +39,12 @@ export default function Packages({ packages }: { packages: PackageWithRelations[
         }
     };
 
+
     const handleOpenPackageInfo = async (packageInfo: PackageWithRelations) => {
-        await getAdditionalInfo();
+        if(!destinations || !activities){
+  await getAdditionalInfo();
+        }
+      
         setSelectedPackage(packageInfo);
         setIsCreateMode(false);
         handleClickOpen();
@@ -61,7 +67,7 @@ const deletePackage = (selectedPackage: PackageWithRelations): void => {
         let confirmDelete = window.confirm(`Do you want to delete the package ${selectedPackage.name}?`);
         if (confirmDelete) {
             axios
-                .delete(`${env.APP_URL}:8000/api/package/${selectedPackage.id}`)
+                .delete(`${APP_URL}/api/package/${selectedPackage.id}`)
                 .then(() => {
                     window.alert(`Package Deleted Successfully`);
                     const newPackageList: PackageWithRelations[] = packageList.filter((pac) => pac.id !== selectedPackage.id);
@@ -91,7 +97,7 @@ const deletePackage = (selectedPackage: PackageWithRelations): void => {
                 }
 
                 await axios
-                    .post(`${env.APP_URL}:8000/api/package`, formData, {
+                    .post(`${APP_URL}/api/package`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
@@ -102,19 +108,17 @@ const deletePackage = (selectedPackage: PackageWithRelations): void => {
                         );
                         window.alert(response.data.message);
                     });
-            } else if (selectedPackage) {
+            } else  {
                 Object.entries(packageData).forEach(([key, value]) => {
                     if (
                         key !== 'image' &&
                         value !== null &&
                         value !== undefined &&
                         value !== '' &&
+                        selectedPackage && 
                         selectedPackage[key as keyof PackageWithRelations] !== value
                     ) {
-                        console.log(`Adding field ${key}:`, {
-                            oldValue: selectedPackage[key as keyof PackageWithRelations],
-                            newValue: value,
-                        });
+                    
                         formData.append(key, value.toString());
                     }
                 });
@@ -123,18 +127,16 @@ const deletePackage = (selectedPackage: PackageWithRelations): void => {
                     formData.append('image', packageData.image);
                 }
 
-                console.log('Form Data Contents:');
-                for (let [key, value] of formData.entries()) {
-                    console.log(`${key}: ${value}`);
-                }
-
                 if ([...formData.entries()].length === 0) {
                     window.alert('Please edit at least one field');
                     return;
                 }
 
                 try {
-                    const response = await axios.patch(`${env.APP_URL}:8000/api/package/${selectedPackage.id}`, formData, {
+                    if(!selectedPackage){
+                        return
+                    }
+                    const response = await axios.post(`${APP_URL}/api/package/${selectedPackage.id}?_method=PUT`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },

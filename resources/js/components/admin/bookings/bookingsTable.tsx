@@ -1,11 +1,10 @@
-import { useAppContext } from '@/contexts/appContext';
 import useDialog from '@/hooks/useDialog';
 import { BookingHistory } from '@/types/types';
 import { Chip, IconButton, Menu, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
 import { MoreHorizontal } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import BookingEditDialog from './editBookingsDialog';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -37,7 +36,7 @@ interface BookingsTableProps {
 }
 
 export default function BookingsTable({ bookings }: BookingsTableProps) {
-    const [ bookingHistory, setBookingHistory ] = useState<BookingHistory[]>(bookings)
+    const [bookingHistory, setBookingHistory] = useState<BookingHistory[]>(bookings);
     const { open, handleClickOpen, handleClose } = useDialog();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedBooking, setSelectedBooking] = useState<BookingHistory | null>(null);
@@ -55,8 +54,6 @@ export default function BookingsTable({ bookings }: BookingsTableProps) {
         handleClickOpen();
         handleMenuClose();
     };
-
-   
 
     return (
         <>
@@ -126,12 +123,18 @@ export default function BookingsTable({ bookings }: BookingsTableProps) {
             </TableContainer>
 
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-                
                 <MenuItem onClick={handleEditClick}>Edit Booking</MenuItem>
-               
             </Menu>
 
-            {selectedBooking && <BookingEditDialog booking={selectedBooking} handleClose={handleClose} open={open} bookingHistory={bookingHistory} setBookingHistory={setBookingHistory}   />}
+            {selectedBooking && (
+                <BookingEditDialog
+                    booking={selectedBooking}
+                    handleClose={handleClose}
+                    open={open}
+                    bookingHistory={bookingHistory}
+                    setBookingHistory={setBookingHistory}
+                />
+            )}
         </>
     );
 }

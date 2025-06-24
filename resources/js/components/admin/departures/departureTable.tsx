@@ -29,11 +29,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     },
 }));
 
-const statusColors = {
-    booked: 'success',
-    pending: 'warning',
-    cancelled: 'error',
-} as const;
+
 
 interface BookingsTableProps {
     departures: Departure[];
@@ -55,6 +51,7 @@ export default function DepartureTable({ departures, addOpen, handleAddClose }: 
         setSelectedDeparture(departure);
     };
 
+    
     const handleMenuClose = () => {
         setAnchorEl(null);
     };

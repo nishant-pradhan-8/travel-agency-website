@@ -31,18 +31,23 @@ interface DestinationDialogProps {
 const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onClose, mode, destination, onSave }) => {
     const { env } = usePage<SharedProps>().props;
     const [formData, setFormData] = React.useState<DestinationFormData>({
-        name: destination?.name || '',
-        description: destination?.description || '',
+        name:  '',
+        description: '',
     });
 
     React.useEffect(() => {
-        if (destination) {
+        if (mode === "edit" && destination) {
             setFormData({
                 name: destination.name,
                 description: destination.description,
             });
+        } else if (mode === "create") {
+            setFormData({
+                name: '',
+                description: '',
+            });
         }
-    }, [destination]);
+    }, [destination, mode]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -63,7 +68,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onClose, mo
                 .then(function (res) {
                     onSave(res.data.data);
                     onClose();
-                   window.alert(res.data.message); 
+                    window.alert(res.data.message);
                 })
                 .catch(function (err) {
                     window.alert(err.response.data.message);
@@ -86,7 +91,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onClose, mo
                         },
                     })
                     .then(function (res) {
-                      console.log(res)
+                    
                         onSave({ ...destination, ...formData } as destination);
                         onClose();
                         window.alert(res.data.message);

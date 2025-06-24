@@ -11,7 +11,7 @@ import axios from 'axios';
 
 export default function Activities({ activities }: { activities: activity[] }) {
     const { env } = usePage<SharedProps>().props;
-    const [newActivities, setNewActivities] = useState<activity[]>(activities);
+    const [newActivities, setNewActivities] = useState<activity[]>(activities.sort((a,b)=>new Date(b.created_at).getDate() - new Date(a.created_at).getDate()));
     const [selectedActivity, setSelectedActivity] = useState<activity | undefined>();
     const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
     const { open, handleClickOpen, handleClose } = useDialog();
@@ -30,7 +30,7 @@ export default function Activities({ activities }: { activities: activity[] }) {
 
     const handleSaveActivity = (updatedActivity: activity) => {
         if (dialogMode === 'create') {
-            setNewActivities([...newActivities, updatedActivity]);
+            setNewActivities([ updatedActivity,...newActivities]);
         } else {
             setNewActivities(newActivities.map(act => 
                 act.id === updatedActivity.id ? updatedActivity : act
@@ -40,7 +40,7 @@ export default function Activities({ activities }: { activities: activity[] }) {
 
     const handleDeleteActivity = (activityToDelete: activity) => {
         axios
-            .delete(`${env.APP_URL}:8000/api/activity/${activityToDelete.id}`)
+            .delete(`${env.APP_URL}/api/activity/${activityToDelete.id}`)
             .then(function (res) {
                 setNewActivities(newActivities.filter(act => act.id !== activityToDelete.id));
                 window.alert(res.data.message);
