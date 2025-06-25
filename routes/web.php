@@ -22,6 +22,8 @@ Route::post('/package/{package}/booking', [BookingController::class, 'store'])->
 Route::get('/booking/success', [BookingController::class, 'success'])->name('success.show');
 Route::get('/packages', [PackageController::class, 'clientIndex'])->name('package.clientIndex');
 Route::get('/booking-history', [BookingController::class, 'show'])->name('bookingHistory.show');
+Route::get('/profile/{user}', [UserController::class, 'show'])->name('profile.show');
+
 
 
 Route::prefix('admin')->group(function () {

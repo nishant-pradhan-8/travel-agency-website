@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -36,9 +39,46 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, User $user)
     {
+        try{
+            $validated = $request->validated();
+            if($request->has('account_status')&& Auth::user()->isAdmin===false){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not allowed to change account status',
+                    'data' => null
+                ], 400);
+            }
+            if($request->hasFile('profile_picture')){
+                unset($validated['profile_picture']);
+            }
+            $user->update($validated);
+            if($request->hasFile('profile_picture')){
+                if($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)){
+                    Storage::disk('public')->delete($user->profile_picture);
+                }
+                $fileName = $user->id.'-'.'profile_picture'.'.'.$request->file('profile_picture')->getClientOriginalExtension();
+                $path = $request->file('profile_picture')->storeAs('profile_picture',$fileName,'public');
+                $user->profile_picture = $path;
+                $user->save();
+
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Account updated successfully',
+                'data' => $user
+            ],200
+        );
+        }catch(Exception $e){
+            return response()->json([
+                'success' => false,
+                'message' => 'An internal server error occurred while deleting Destination. Please Try again',
+                'data' => null
+            ], 500);
+        }
         
+
     }
 
     /**

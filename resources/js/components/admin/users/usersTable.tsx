@@ -43,7 +43,7 @@ export default function UsersTable({ users }: UsersTableProps) {
     };
 
     const handleEditClick = () => {
-       axios.patch()
+
         handleMenuClose();
     };
 

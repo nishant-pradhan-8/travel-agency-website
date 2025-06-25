@@ -10,6 +10,7 @@ interface UsersPageProps {
 }
 
 export default function Users({ users }: UsersPageProps) {
+    console.log(users)
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">

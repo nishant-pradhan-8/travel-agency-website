@@ -134,6 +134,6 @@ export interface User {
     id: number;
     isAdmin: number; 
     phone: string;
-    profile_picture: string;
+    profile_picture: string | null;
     updated_at: string;
   }

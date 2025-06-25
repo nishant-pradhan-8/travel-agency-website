@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\DepartureController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\DestinationController;
 use App\Http\Controllers\Api\PackageController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*Not Used*/
@@ -23,5 +24,5 @@ Route::resource('departure', DepartureController::class)->only(['index', 'store'
 
 Route::get('/analytics/{timeFrame}', [AnalyticsController::class,'bookingAnalytics']);
 
+Route::resource('user', UserController::class)->only(['index', 'store', 'update','destroy']);
 
-Route::resource('user', [UserController::class,'bookingAnalytics']);
