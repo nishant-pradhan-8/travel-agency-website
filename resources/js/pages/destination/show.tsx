@@ -2,9 +2,10 @@ import PackagesList from '@/components/packagesList';
 import CallToActionSection from '@/components/homeComponents/cta';
 import PagesHero from '@/components/pages-hero';
 import AppLayout from '@/layouts/app-layout';
-import { info, Package } from '@/types/types';
+import { info, Package, PackageWithRelations } from '@/types/types';
 import { ReactNode } from 'react';
-export default function Destination({  packages }: { packages: Package[] }) {
+export default function Destination({  packages }: { packages: PackageWithRelations[] }) {
+    
     return (
         <>
             <PagesHero info={packages[0].destination} source='Destinations' />

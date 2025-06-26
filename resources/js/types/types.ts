@@ -54,6 +54,7 @@ export interface review {
     user: {
         id: string;
         full_name: string;
+        profile_picture: string;
     };
     created_at: string;
     updated_at: string;
@@ -137,3 +138,9 @@ export interface User {
     profile_picture: string | null;
     updated_at: string;
   }
+
+export interface UserProps extends PageProps {
+    auth: {
+        user: User;
+    };
+}

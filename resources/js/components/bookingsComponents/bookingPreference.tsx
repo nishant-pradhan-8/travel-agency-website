@@ -1,10 +1,10 @@
-import { departure, Package } from "@/types/types";
+import { Departure, Package } from "@/types/types";
 import { useAppContext } from "@/contexts/appContext";
 import { FormEvent, useEffect } from "react";
 import { router } from "@inertiajs/react";
 interface BookingPreferenceProps {
   packageInfo: Package;
-  departures: departure[];
+  departures: Departure[];
 }
 
 export default function BookingPreference({ packageInfo, departures }: BookingPreferenceProps) {
@@ -16,7 +16,7 @@ export default function BookingPreference({ packageInfo, departures }: BookingPr
 
     
      e.preventDefault();
-    const selectedSlot:departure | null = departures.find(dep=>Number(dep.id)===data.departureId) || null;
+    const selectedSlot:Departure | null = departures.find(dep=>Number(dep.id)===data.departureId) || null;
   
     if(!selectedSlot){
 
@@ -29,12 +29,11 @@ export default function BookingPreference({ packageInfo, departures }: BookingPr
       return window.alert(`Not enough available spots for the selected departure.`);
     }
 
-    // Calculate total price
+   
     const basePrice = Number(packageInfo.price);
     const baseDiscount = Number(packageInfo.discount);
-    const totalPrice = Math.round((basePrice * data.noOfPeople) - (baseDiscount * basePrice * data.noOfPeople / 100));
-    
-    // Set total price before submitting
+    const totalPrice = (basePrice * data.noOfPeople) - (baseDiscount * basePrice * data.noOfPeople / 100);
+
     setData('totalPrice', totalPrice);
     
     post(route('package.booking.store', { package: packageInfo.id }));
@@ -118,7 +117,7 @@ export default function BookingPreference({ packageInfo, departures }: BookingPr
         <button
           type="submit"
           disabled={processing}
-          className="bg-teal-800 rounded-xl px-4 mt-4 py-2 text-white disabled:opacity-50"
+          className="bg-teal-800 rounded-xl cursor-pointer px-4 mt-4 py-2 text-white disabled:opacity-50"
         >
           {processing ? 'Booking....' : 'Confirm Booking'}
         </button>

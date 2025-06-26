@@ -1,8 +1,8 @@
 
-import { Package, info } from '@/types/types';
+import { Package, PackageWithRelations, info } from '@/types/types';
 import { Link } from '@inertiajs/react';
 
-const PackagesList = ({ packages}:{ packages: Package[]}) => {
+const PackagesList = ({ packages}:{ packages: PackageWithRelations[]}) => {
  
 
     return (

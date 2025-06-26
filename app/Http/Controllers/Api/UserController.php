@@ -43,7 +43,7 @@ class UserController extends Controller
     {
         try{
             $validated = $request->validated();
-            if($request->has('account_status')&& Auth::user()->isAdmin===false){
+            if($request->has('account_status') && $request->user()->isAdmin===false){
                 return response()->json([
                     'success' => false,
                     'message' => 'You are not allowed to change account status',
@@ -74,7 +74,8 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'An internal server error occurred while deleting Destination. Please Try again',
-                'data' => null
+                'data' => null,
+                'error'=> $e->getMessage()
             ], 500);
         }
         

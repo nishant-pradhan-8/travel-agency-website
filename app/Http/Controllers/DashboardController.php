@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Package;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Carbon;
+
 
 class DashboardController extends Controller
 {
@@ -30,7 +34,19 @@ class DashboardController extends Controller
         ->limit(5)
         ->get();
 
-        return Inertia::render("admin/home", ["topDestinations" => $topDestinations,"topActivities" => $topActivities]);
+        $customersCount = User::count();
+        $packageCount = Package::count();
+        $newBookings = DB::table('bookings')
+        ->select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('COUNT(*) as Bookings')
+        )
+        ->whereDate('created_at', Carbon::today())
+        ->groupBy(DB::raw('DATE(created_at)'))
+        ->get();
+     
+
+        return Inertia::render("admin/home", ["topDestinations" => $topDestinations,"topActivities" => $topActivities,"customerCount"=>$customersCount, "packageCount" => $packageCount,"newBookings"=> $newBookings[0]->Bookings]);
     }
  
     /**

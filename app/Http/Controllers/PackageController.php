@@ -57,7 +57,7 @@ class PackageController extends Controller
       
         $destinationName = Destination::where('id',$package['destination_id'])->value('name');
         $activityName = Activity::where('id',$package['activity_id'])->value('name');
-        $reviews = Review::with('user:id,full_name')->where('package_id',$package['id'])->get();
+        $reviews = Review::with('user:id,full_name,profile_picture')->where('package_id',$package['id'])->get();
         $departures = Departure::where('package_id',$package['id'])->get();
     
         return Inertia::render('package/show',[

@@ -11,42 +11,67 @@ export interface DashboradCard {
     name: string;
     amount: number;
 }
-const dashboardCards: DashboradCard[] = [
-    {
-        icon: <Ticket />,
-        name: 'New Bookings',
-        amount: 350,
-    },
-    {
-        icon: <Person2Icon />,
-        name: 'Total Customers',
-        amount: 100,
-    },
 
-    {
-        icon: <BackpackIcon />,
-        name: 'Total Packages',
-        amount: 24,
-    },
-];
-export default function MainDashboard({ topDestinations, topActivities }: { topDestinations: PopularInfo[]; topActivities: PopularInfo[] }) {
+export default function MainDashboard({
+    topDestinations,
+    topActivities,
+    customerCount,
+    packageCount,
+    newBookings,
+}: {
+    topDestinations: PopularInfo[];
+    topActivities: PopularInfo[];
+    customerCount: number;
+    packageCount: number;
+    newBookings: number;
+}) {
+    const dashboardCards: DashboradCard[] = [
+        {
+            icon: <Ticket />,
+            name: 'New Bookings',
+            amount: newBookings,
+        },
+        {
+            icon: <Person2Icon />,
+            name: 'Total Customers',
+            amount: customerCount,
+        },
+
+        {
+            icon: <BackpackIcon />,
+            name: 'Total Packages',
+            amount: packageCount,
+        },
+    ];
+    console.log(topDestinations);
     return (
-        <div className="dashboard-parent w-full max-w-[1440px]">
-            {dashboardCards.map((card, idx) => (
-                <div className={`div${idx + 1} bg-white  flex items-center rounded-xl border-[1px] border-gray-300 p-4`} key={card.name}>
-                    <DashboardCard details={card} />
+        <div className="flex w-full max-w-[1440px] flex-row gap-4">
+            <div className='flex flex-col gap-4 flex-1'>
+                <div className="flex flex-row gap-4">
+                    {dashboardCards.map((card, idx) => (
+                        <div
+                            className={`div${idx + 1} flex min-w-[250px] items-center rounded-xl border-[1px] border-gray-300 bg-white p-4`}
+                            key={card.name}
+                        >
+                            <DashboardCard icon={card.icon} name={card.name} amount={card.amount} />
+                        </div>
+                ))}
                 </div>
-            ))}
 
-            <div className="dashboard-div4">
-                <RevenueChart />
+                <div className="">
+                    <RevenueChart />
+                </div>
             </div>
-            <div className="dashboard-div5 ">
+            <div className='flex flex-col gap-4 flex-1'>
+ 
                 <PopularCard info={topDestinations} source="Destinations" />
-            </div>
-            <div className="dashboard-div6">
+ 
+      
                 <PopularCard info={topActivities} source="Activites" />
+ 
             </div>
+
+          
         </div>
     );
 }

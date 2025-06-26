@@ -10,19 +10,22 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*Not Used*/
+
 Route::get('/packages/{package}/departures', [DepartureController::class, 'show']);
 
-Route::patch('/booking/{booking}', [BookingController::class, 'update']);
+Route::middleware('auth:sanctum')->group(function () {
 
-Route::resource('destination', DestinationController::class)->only(['index','store', 'update','destroy']);
-;
-Route::resource('activity', ActivityController::class)->only(['index', 'store', 'update','destroy']);
+    Route::get('/analytics/{timeFrame}', [AnalyticsController::class, 'bookingAnalytics']);
 
-Route::resource('package', PackageController::class)->only(['index', 'store', 'update','destroy']);
 
-Route::resource('departure', DepartureController::class)->only(['index', 'store', 'update','destroy']);
+    Route::patch('/booking/{booking}', [BookingController::class, 'update']);
 
-Route::get('/analytics/{timeFrame}', [AnalyticsController::class,'bookingAnalytics']);
+    Route::resource('destination', DestinationController::class)->only(['index', 'store', 'update', 'destroy']);;
+    Route::resource('activity', ActivityController::class)->only(['index', 'store', 'update', 'destroy']);
 
-Route::resource('user', UserController::class)->only(['index', 'store', 'update','destroy']);
+    Route::resource('package', PackageController::class)->only(['index', 'store', 'update', 'destroy']);
 
+    Route::resource('departure', DepartureController::class)->only(['index', 'store', 'update', 'destroy']);
+
+    Route::resource('user', UserController::class)->only(['index', 'store', 'update', 'destroy']);
+});

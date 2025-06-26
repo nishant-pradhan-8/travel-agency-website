@@ -10,7 +10,7 @@ export default function RevenueChart() {
     const { APP_URL } = useAppContext();
     
    useEffect(() => {
-    axios.get(`${APP_URL}/api/analytics/${selectedFilter}`).then((res)=>{
+    axios.get(`${APP_URL}/api/analytics/${selectedFilter}`,{withCredentials: true}).then((res)=>{
       setBookingsData(res.data.data)
 
     }).catch(()=>{
@@ -25,9 +25,9 @@ export default function RevenueChart() {
 
 
     return (
-        <div className="rounded-xl border-[1px] border-gray-300 bg-white p-4">
-            <div className="flex flex-row justify-between">
-                <h2 className="mb-4 text-[1rem] font-bold text-teal-800">Bookings Overview</h2>
+        <div className="rounded-xl border-[1px] h-full border-gray-300 bg-white p-4">
+            <div className="flex mb-8  mt-4 flex-row justify-between">
+                <h2 className="text-[1rem] font-bold text-teal-800">Bookings Overview</h2>
 
                 <div className="flex flex-row gap-2 text-[0.9rem] text-teal-800">
                     <button

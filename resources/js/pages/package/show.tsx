@@ -1,14 +1,14 @@
 import Navbar from "@/components/homeComponents/navbar";
 import PagesHero from "@/components/pages-hero";
 import PakcageInfoSection from "@/components/packageComponents/packageInfoSection";
-import { departure, Package, review } from "@/types/types";
+import { Departure,Package, review } from "@/types/types";
 import GroupDiscountTable from "@/components/packageComponents/groupDiscountTable";
 export interface additionalInfo {
       destinationName: string,
       activityName: string,
 }
-export default function({additionalInfo,packageInfo, reviews, departures}:{additionalInfo:additionalInfo,packageInfo:Package, reviews:review[], departures:departure[]}){
-
+export default function({additionalInfo,packageInfo, reviews, departures}:{additionalInfo:additionalInfo,packageInfo:Package, reviews:review[], departures:Departure[]}){
+  
     return(
         <>
          <div

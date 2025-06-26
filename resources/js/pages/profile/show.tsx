@@ -8,12 +8,7 @@ import { Avatar, Button, TextField } from '@mui/material';
 import axios from 'axios';
 import React, { ReactNode, useRef, useState } from 'react';
 import { Update } from 'vite/types/hmrPayload.js';
-interface Props extends PageProps {
-    auth: {
-        user: User;
-    };
-}
-
+import { UserProps } from '@/types/types';
 interface UpdateProfile {
     profile_picture: File | null;
     full_name: string;
@@ -31,7 +26,8 @@ interface ValidationErrors {
 
 export default function Profile() {
     const { APP_URL } = useAppContext();
-    const { user } = usePage<Props>().props.auth;
+    const { user } = usePage<UserProps>().props.auth;
+    console.log(user)
     const [formData, setFormData] = useState<UpdateProfile>({
         full_name: user.full_name,
         email: user.email,

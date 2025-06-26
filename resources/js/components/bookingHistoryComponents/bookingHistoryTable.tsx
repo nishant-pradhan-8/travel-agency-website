@@ -38,7 +38,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 export default function BookingHistoryTable({ bookings }: { bookings: BookingHistory[] }) {
    
-    const [ bookingHistory, setBookingHistory ] = useState<BookingHistory[]>(bookings)
+    const [ bookingHistory, setBookingHistory ] = useState<BookingHistory[]>(bookings.sort((a,b)=>new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
     const { env } = usePage<SharedProps>().props;
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedBooking, setSelectedBooking] = useState<number | null>(null);
@@ -65,7 +65,7 @@ export default function BookingHistoryTable({ bookings }: { bookings: BookingHis
                     }
                     return booking;
                 });
-                setBookingHistory(updatedBookingHistory);
+                setBookingHistory(updatedBookingHistory.sort((a,b)=>new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
                  window.alert(res.data.message);
             })
             .catch(function (error) {

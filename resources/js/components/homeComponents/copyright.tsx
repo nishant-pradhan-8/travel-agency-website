@@ -4,7 +4,7 @@ export default function CopyrightFooter() {
 
       <div className=" flex justify-between items-center  py-6 px-4 border-t border-gray-200  max-w-[1440px] mx-auto">
         <div className="text-sm text-gray-600">
-          copyright@ prydetravel 2023
+          copyright@mokshtravel 2025
         </div>
         
         <div className="flex items-center space-x-4">

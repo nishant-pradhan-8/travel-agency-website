@@ -9,7 +9,7 @@ export default function CallToActionSection() {
           Give us a quick call
         </p>
         
-        <button className="bg-primary hover:bg-[primary] text-black font-semibold px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg inline-flex items-center gap-2">
+        <button className="bg-primary cursor-pointer hover:bg-[primary] text-black font-semibold px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg inline-flex items-center gap-2">
           Contact us
         <img className="w-4 h-4" src="/images/right.svg" />
         </button>

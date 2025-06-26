@@ -98,14 +98,20 @@ class AnalyticsController extends Controller
                 $endOfWeek = Carbon::now()->endOfWeek();    
                 
                 $data = DB::table('bookings')
-                    ->select(
-                        DB::raw('DAYNAME(created_at) as label'),
-                        DB::raw('COUNT(*) as Bookings')
-                    )
-                    ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
-                    ->groupBy(DB::raw('DAYNAME(created_at)')) // Preserves weekday order (1=Sunday, 7=Saturday)
-                    ->orderBy(DB::raw('DAYNAME(created_at)'))
-                    ->get();
+                ->select(
+                    DB::raw('DAYNAME(created_at) as label'),
+                    DB::raw('COUNT(*) as Bookings'),
+                    DB::raw('DAYOFWEEK(created_at) as weekday_num')
+                )
+                ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+                ->groupBy('label', 'weekday_num')
+                ->orderBy('weekday_num')
+                ->get();
+                foreach($data as $item){
+                    unset($data->weekday_num);
+                }
+
+            
                 
             }else{
                 return response()->json([

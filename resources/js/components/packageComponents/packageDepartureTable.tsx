@@ -7,7 +7,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { departure, Package } from '@/types/types';
+import { Departure, Package } from '@/types/types';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -30,7 +30,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 
-export default function DepartureTable({departures, packageInfo}:{departures:departure[], packageInfo:Package}) {
+export default function DepartureTable({departures, packageInfo}:{departures:Departure[], packageInfo:Package}) {
   console.log(departures)
 
   return (
@@ -41,8 +41,7 @@ export default function DepartureTable({departures, packageInfo}:{departures:dep
             <StyledTableCell className='!bg-teal-800 border-r-[1px] border-gray-300' align="center">Trip</StyledTableCell>
             <StyledTableCell className='!bg-teal-800 border-r-[1px] border-gray-300' align="center">Departure Date</StyledTableCell>
             <StyledTableCell className='!bg-teal-800 border-r-[1px] border-gray-300' align="center">Price</StyledTableCell>
-            <StyledTableCell className='!bg-teal-800 ' align="center">Book</StyledTableCell>
-    
+           
           </TableRow>
         </TableHead>
         <TableBody>
@@ -55,8 +54,7 @@ export default function DepartureTable({departures, packageInfo}:{departures:dep
         
               <StyledTableCell align="center">${packageInfo.price}</StyledTableCell>
         
-              <StyledTableCell align="center"><button>Book</button></StyledTableCell>
-        
+           
             
             </StyledTableRow>
           ))}

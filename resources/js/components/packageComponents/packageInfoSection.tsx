@@ -1,13 +1,18 @@
 import { additionalInfo } from '@/pages/package/show';
-import { Package, review, departure } from '@/types/types';
+import { Package, review, Departure } from '@/types/types';
 import DepartureTable from './packageDepartureTable';
 import GroupDiscountTable from './groupDiscountTable';
 import PackageReview from './packageReview';
 import BookingCard from './bookingCard';
+import TimelapseIcon from '@mui/icons-material/Timelapse';
+import { ReactNode } from 'react';
+import RowingIcon from '@mui/icons-material/Rowing';
+
+import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 interface tripSummary{
         name: string,
         info: string,
-        image: string,
+        image: ReactNode,
 }
 export default function PakcageInfoSection({
     additionalInfo,
@@ -18,23 +23,23 @@ export default function PakcageInfoSection({
     additionalInfo: additionalInfo;
     packageInfo: Package;
     reviews: review[];
-    departures: departure[]
+    departures: Departure[]
 }) {
     const tripSummary:tripSummary[] = [
         {
             name: 'Duration',
             info: packageInfo.duration,
-            image: '/images/duration.svg',
+            image: <TimelapseIcon className='!w-8 !h-8' />,
         },
         {
             name: 'Activity',
             info: additionalInfo.activityName,
-            image: '/images/activity.svg',
+            image: <RowingIcon className='!w-8 !h-8' /> ,
         },
         {
             name: 'Destination',
             info: additionalInfo.destinationName,
-            image: '/images/destinationIcon.svg',
+            image: <BeachAccessIcon className='!w-8 !h-8' />,
         },
     ];
     return (
@@ -45,7 +50,7 @@ export default function PakcageInfoSection({
                 <div className="flex flex-row flex-wrap items-center gap-4">
                     {tripSummary.map((sum,i) => (
                         <div key={i} className="flex flex-row items-center gap-2">
-                            <img src={sum.image} className="h-10 w-10" />
+                            {sum.image}
                             <div className="text-[0.8rem] font-bold">
                                 {sum.name} <br />
                                 <span className="font-semibold text-teal-800">{sum.info}</span>

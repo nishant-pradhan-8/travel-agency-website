@@ -4,7 +4,7 @@ import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 
 export default function PopularCard({info, source}:{info:PopularInfo[], source:string}) {
   return (
-    <div className="bg-white  items-center rounded-xl border-[1px] border-gray-300 p-6 w-full max-w-xs">
+    <div className="bg-white min-w-[250px]  items-center rounded-xl border-[1px] border-gray-300 p-6 w-full max-w-xs">
       <div className="mb-2 text-gray-900 font-semibold text-lg">Popular {source}</div>
       <div className="flex flex-col gap-4">
         {info.map((info) => (

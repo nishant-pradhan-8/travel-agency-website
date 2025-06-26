@@ -5,7 +5,7 @@ import { usePage } from "@inertiajs/react";
 export default function PopularDestinations() {
    const {destinations} = usePage<Partial<MyPageProps>>().props
     return (
-        <div className="container relative slider">
+        <div  className="container relative slider">
             <p className="mb-2 text-lg text-gray-700 font-bold">Where You Can Go</p>
             <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-4xl font-bold text-teal-800">Popular Destinations</h2>

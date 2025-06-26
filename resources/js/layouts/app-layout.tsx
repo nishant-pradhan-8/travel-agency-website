@@ -2,7 +2,7 @@ import CopyrightFooter from '@/components/homeComponents/copyright';
 import NavbarFooter from '@/components/homeComponents/navbarFooter';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
-import { type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 interface AppLayoutProps {
     children: ReactNode;
@@ -16,5 +16,6 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => (
                 <NavbarFooter />
                 <CopyrightFooter />
             </footer>
+            
     </div>
 );

@@ -1,3 +1,4 @@
+import { SharedData } from '@/types';
 import { activity, destination } from '@/types/types'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import {
@@ -7,9 +8,13 @@ import {
   Square2StackIcon,
   TrashIcon,
 } from '@heroicons/react/24/solid'
-import { Link, router } from '@inertiajs/react'
-
+import { Link, router, usePage } from '@inertiajs/react'
+import { UserProps } from '@/types/types';
 export default function ProfileDropdown(){
+ 
+  const { user } = usePage<UserProps>().props.auth;
+
+
   const handleLogout = ()=>{
     router.post(route('logout'));
   }
@@ -25,33 +30,40 @@ export default function ProfileDropdown(){
                   transition
                   
                   anchor="bottom end"
-                  className="w-52 origin-top-right z-50 bg-gray-800 rounded-xl border border-white/5 p-1 text-sm/6 text-white transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0"
+                  className={` w-52 origin-top-right z-50 bg-gray-800 rounded-xl border border-white/5 p-1 text-sm/6 text-white transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0`}
                 >
                     <MenuItem>
-                    <Link href={route('profile.show',1)} className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10">
+                    <Link href={route('profile.show',1)} className={`${!user && 'hidden'} group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10`}>
            
                       Profile
         
                     </Link>
                   </MenuItem>
          <MenuItem>
-                    <Link href={route('bookingHistory.show')} className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10">
+                    <Link href={route('bookingHistory.show')} className={`${!user && 'hidden'} group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10`}>
            
                       Booking History
         
                     </Link>
                   </MenuItem>
                       <MenuItem>
-                    <button onClick={handleLogout}  className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10">
+                    <button onClick={handleLogout}  className={`${!user && 'hidden'} group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10`}>
            
                       Logout
         
                     </button>
                   </MenuItem>
-                   
+                  <MenuItem>
+                    <Link href={route('login')} className={`${user && 'hidden' } cursor-pointer group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10`}>
+           
+                      Login / Register
+                    </Link>
+                
+                  </MenuItem>
                 
               
                 </MenuItems>
+             
               </Menu>
     )
 }

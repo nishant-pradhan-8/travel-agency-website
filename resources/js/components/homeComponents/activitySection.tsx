@@ -5,7 +5,7 @@ import { usePage } from "@inertiajs/react";
 export default function ActivitySection(){
        const {activities} = usePage<Partial<MyPageProps>>().props
     return(
-        <div>
+        <div >
  <div className="">
       <p className="mb-2 text-lg text-gray-700 font-bold">What You Can Do</p>
             <div className="mb-6 flex items-center justify-between">

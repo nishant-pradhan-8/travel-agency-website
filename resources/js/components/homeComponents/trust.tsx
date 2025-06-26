@@ -1,11 +1,13 @@
 import React from 'react';
+import Tag from './tag';
 
 
 
 const Trust = () => {
   return (
-    <div className="bg-yellow-100 py-16 pt-24 px-4 sm:px-6 lg:px-8"> {/* Adjusted background color to be close to the image, and added padding */}
-      <div className="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+    <div   className="bg-yellow-100 py-16  "> {/* Adjusted background color to be close to the image, and added padding */}
+   
+      <div className="max-w-[1440px] mx-auto grid px-4 grid-cols-1 md:grid-cols-3 gap-8 ">
       
         <div className="flex flex-col items-center text-center">
           <div className="mb-4">

@@ -29,7 +29,7 @@ class UpdateUserRequest extends FormRequest
             'email' => 'sometimes|string|lowercase|email|max:255|unique:users,email',
             'address' => 'sometimes|string|max:255',
             'phone' => 'sometimes|numeric|digits_between:7,20',
-            'account_status'=> ['sometimes|in:active,blocked']
+            'account_status'=> 'sometimes|in:active,blocked'
         ];
     }
     public function withValidator($validator)
@@ -40,7 +40,6 @@ class UpdateUserRequest extends FormRequest
             }
         });
     }
-    /*
 
     protected function failedValidation(Validator $validator){
         throw new HttpResponseException(
@@ -53,5 +52,5 @@ class UpdateUserRequest extends FormRequest
             )
             );
     }
-*/
+
 }

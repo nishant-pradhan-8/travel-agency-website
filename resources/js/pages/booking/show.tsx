@@ -1,7 +1,7 @@
 import BookingNav from "@/components/bookingsComponents/bookingsNav"
-import { departure, Package } from "@/types/types"
+import { Departure, Package } from "@/types/types"
 import BookingsInfo from "@/components/bookingsComponents/bookingsInfo"
-export default function Booking({packageInfo, departures}:{packageInfo:Package, departures:departure[]}){
+export default function Booking({packageInfo, departures}:{packageInfo:Package, departures:Departure[]}){
     
     return(
         <>
