@@ -43,7 +43,6 @@ export default function MainDashboard({
             amount: packageCount,
         },
     ];
-    console.log(topDestinations);
     return (
         <div className="flex w-full max-w-[1440px] flex-row gap-4">
             <div className='flex flex-col gap-4 flex-1'>

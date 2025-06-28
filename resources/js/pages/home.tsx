@@ -21,10 +21,7 @@ export default function Welcome({ destinations, activities }: { destinations: de
                 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css" />
                 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css" />
                 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-                <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-                <script>
-  AOS.init();
-</script>
+            
             </Head>
             <section
                 style={{ backgroundImage: `url("/images/heroimg.png")` }}

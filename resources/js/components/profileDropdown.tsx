@@ -33,7 +33,7 @@ export default function ProfileDropdown(){
                   className={` w-52 origin-top-right z-50 bg-gray-800 rounded-xl border border-white/5 p-1 text-sm/6 text-white transition duration-100 ease-out [--anchor-gap:--spacing(1)] focus:outline-none data-closed:scale-95 data-closed:opacity-0`}
                 >
                     <MenuItem>
-                    <Link href={route('profile.show',1)} className={`${!user && 'hidden'} group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10`}>
+                    <Link href={route('user.show',user.id)} className={`${!user && 'hidden'} group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-white/10`}>
            
                       Profile
         

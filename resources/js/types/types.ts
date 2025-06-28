@@ -75,11 +75,10 @@ export interface Departure {
 }
 
 export interface FormData {
-    noOfPeople: number;
-    departureId: number | null;
+    number_of_person: number;
+    departure_id: number | null;
     messege: string;
     totalPrice: number | null;
-
     [key: string]: any;
 }
 

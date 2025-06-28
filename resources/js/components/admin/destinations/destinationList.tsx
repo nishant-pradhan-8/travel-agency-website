@@ -17,7 +17,7 @@ const DestinationCard: React.FC<DestinationCardProps> = ({ destination, onEdit, 
   };
 
   return (
-    <div className="flex flex-col bg-white border w-full border-gray-300 rounded-xl p-4 gap-4 shadow-sm">
+    <div className="flex flex-col bg-white  w-full  rounded-xl p-4 gap-4 border-[1px] border-gray-300">
       {/* Header: Title + Actions */}
       <div className="flex justify-between items-start">
         <h2 className="text-xl font-bold text-gray-800">{destination.name}</h2>

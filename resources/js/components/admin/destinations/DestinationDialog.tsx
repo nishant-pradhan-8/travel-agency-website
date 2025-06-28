@@ -1,9 +1,8 @@
 import { destination, SharedProps } from '@/types/types';
-import { usePage } from '@inertiajs/react';
+import { usePage, useForm } from '@inertiajs/react';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
 import React from 'react';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -18,6 +17,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 interface DestinationFormData {
     name: string;
     description: string;
+    [key: string]: any;
 }
 
 interface DestinationDialogProps {
@@ -25,89 +25,64 @@ interface DestinationDialogProps {
     onClose: () => void;
     mode: 'create' | 'edit';
     destination?: destination;
-    onSave: (data: destination) => void;
 }
 
-const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onClose, mode, destination, onSave }) => {
+const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onClose, mode, destination }) => {
     const { env } = usePage<SharedProps>().props;
-    const [formData, setFormData] = React.useState<DestinationFormData>({
-        name:  '',
+   
+
+    const { data, setData, post, patch, processing, errors, reset } = useForm<DestinationFormData>({
+        name: '',
         description: '',
     });
 
     React.useEffect(() => {
         if (mode === "edit" && destination) {
-            setFormData({
+            setData({
                 name: destination.name,
                 description: destination.description,
             });
         } else if (mode === "create") {
-            setFormData({
-                name: '',
-                description: '',
-            });
+            reset();
         }
-    }, [destination, mode]);
+    }, [destination, mode, setData, reset]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setData(name as keyof DestinationFormData, value);
     };
 
     const handleSubmit = () => {
+     
         if (mode === 'create') {
-            axios
-                .post(`${env.APP_URL}:8000/api/destination`, formData, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                })
-                .then(function (res) {
-                    onSave(res.data.data);
+            post(route('destinations.store'), {
+                onSuccess: () => {
+                   
                     onClose();
-                    window.alert(res.data.message);
-                })
-                .catch(function (err) {
-                    window.alert(err.response.data.message);
-                });
-        } else {
-            const reqBody: Partial<DestinationFormData> = {};
-
-            if (destination && formData.name !== destination.name) {
-                reqBody.name = formData.name;
-            }
-            if (destination && formData.description !== destination.description) {
-                reqBody.description = formData.description;
-            }
-
-            if (Object.keys(reqBody).length > 0) {
-                axios
-                    .patch(`${env.APP_URL}:8000/api/destination/${destination?.id}`, reqBody, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    })
-                    .then(function (res) {
-                    
-                        onSave({ ...destination, ...formData } as destination);
-                        onClose();
-                        window.alert(res.data.message);
-                    })
-                    .catch(function (err) {
-                        window.alert(err.response.data.message);
-                    });
-            } else {
-                onClose();
-            }
+                    window.alert('Destination created successfully');
+                },
+                onError: () => {
+                    window.alert('Failed to create destination');
+                },
+                preserveState: false,
+            });
+        } else if (mode === 'edit' && destination) {
+            patch(route('destinations.update', destination.id), {
+                onSuccess: () => {
+                    onClose();
+                    window.alert('Destination updated successfully');
+                },
+                onError: () => {
+                    window.alert('Failed to update destination');
+                },
+                preserveState: false,
+            });
         }
     };
 
-    const isFormValid = formData.name.trim() !== '' && formData.description.trim() !== '';
+    const isFormValid = data.name.trim() !== '' && data.description.trim() !== '';
     const isEditMode = mode === 'edit';
-    const hasChanges = isEditMode && destination && (formData.name !== destination.name || formData.description !== destination.description);
+    const hasChanges = isEditMode && destination && (data.name !== destination.name || data.description !== destination.description);
 
     return (
         <BootstrapDialog onClose={onClose} aria-labelledby="customized-dialog-title" open={open} maxWidth="sm" fullWidth>
@@ -132,7 +107,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onClose, mo
                         fullWidth
                         label="Destination Name"
                         name="name"
-                        value={formData.name}
+                        value={data.name}
                         onChange={handleInputChange}
                         variant="outlined"
                         required
@@ -141,7 +116,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onClose, mo
                         fullWidth
                         label="Description"
                         name="description"
-                        value={formData.description}
+                        value={data.description}
                         onChange={handleInputChange}
                         multiline
                         rows={4}
@@ -152,7 +127,7 @@ const DestinationDialog: React.FC<DestinationDialogProps> = ({ open, onClose, mo
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose}>Cancel</Button>
-                <Button onClick={handleSubmit} variant="contained" color="primary" disabled={!isFormValid || (isEditMode && !hasChanges)}>
+                <Button onClick={handleSubmit} variant="contained" color="primary" disabled={!isFormValid || (isEditMode && !hasChanges) || processing}>
                     {isEditMode ? 'Save Changes' : 'Create'}
                 </Button>
             </DialogActions>

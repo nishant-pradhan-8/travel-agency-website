@@ -1,7 +1,6 @@
 import { PackageWithRelations, SharedProps } from '@/types/types';
 import { usePage } from '@inertiajs/react';
 import DeleteIcon from '@mui/icons-material/Delete';
-import axios from 'axios';
 import React from 'react';
 import { useAppContext } from '@/contexts/appContext';
 const PackageCard: React.FC<{

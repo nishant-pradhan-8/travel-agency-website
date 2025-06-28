@@ -1,5 +1,5 @@
 import { Departure, info, SharedProps } from '@/types/types';
-import { usePage } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -9,9 +9,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
 import * as React from 'react';
-import { useAppContext } from '@/contexts/appContext';
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2),
@@ -25,51 +24,49 @@ interface AddDeparture {
     departure_date: string;
     package_id: number;
     available_slots: number;
+    [key:string]:any
 }
 
 export default function AddDepartureDialog({
     handleClose,
     open,
-    departureHistory,
-    setDepartureHistory,
     packageList
 }: {
     handleClose: () => void;
     open: boolean;
-    departureHistory: Departure[];
-    setDepartureHistory: React.Dispatch<React.SetStateAction<Departure[]>>;
-    packageList:info[] | null;
+    packageList: info[] | null;
 }) {
-    const {APP_URL} = useAppContext();
-    const [newDeparture, setNewDeparture] = React.useState<AddDeparture>({
+    const { data, setData, post, processing, reset } = useForm<AddDeparture>({
         departure_date: '',
         package_id: 0,
         available_slots: 0,
     });
 
+    React.useEffect(() => {
+        if (!open) reset();
+    }, [open, reset]);
+
     const handleSelectChange = (event: SelectChangeEvent<string | number>) => {
         const { name, value } = event.target;
-        setNewDeparture((val) => ({ ...val, [name]: value }));
+        setData(name as keyof AddDeparture, value);
     };
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        
         const { name, value } = event.target;
-        setNewDeparture((val) => ({ ...val, [name]: value }));
+        setData(name as keyof AddDeparture, value);
     };
 
     const handleSubmit = () => {
-       
-        axios
-            .post(`${APP_URL}/api/departure`, newDeparture)
-            .then(function (res) {
-                setDepartureHistory([res.data.data,...departureHistory]);
-                window.alert(res.data.message);
+        post(route('departures.store'), {
+            onSuccess: () => {
+                window.alert('Departure added successfully');
                 handleClose();
-            })
-            .catch(function (err) {
-                window.alert(err.response.data.message);
-            });
+            },
+            onError: () => {
+                window.alert('Failed to add departure');
+            },
+            preserveState: false,
+        });
     };
 
     return (
@@ -96,7 +93,7 @@ export default function AddDepartureDialog({
                             name="departure_date"
                             label="Departure Date"
                             type="date"
-                            value={newDeparture.departure_date}
+                            value={data.departure_date}
                             onChange={handleInputChange}
                             InputLabelProps={{ shrink: true }}
                             fullWidth
@@ -106,11 +103,11 @@ export default function AddDepartureDialog({
                             <InputLabel>Package</InputLabel>
                             <Select
                                 name="package_id"
-                                value={newDeparture.package_id}
+                                value={data.package_id}
                                 label="Package"
                                 onChange={handleSelectChange}
                             >
-                                 {packageList && packageList.map((pac) => (
+                                {packageList && packageList.map((pac) => (
                                     <MenuItem key={pac.id} value={pac.id}>
                                         {pac.name}
                                     </MenuItem>
@@ -122,7 +119,7 @@ export default function AddDepartureDialog({
                             name="available_slots"
                             label="Available Slots"
                             type="number"
-                            value={newDeparture.available_slots}
+                            value={data.available_slots}
                             onChange={handleInputChange}
                             fullWidth
                         />
@@ -131,7 +128,12 @@ export default function AddDepartureDialog({
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button
-                        disabled={!newDeparture.departure_date || !newDeparture.package_id || !newDeparture.available_slots}
+                        disabled={
+                            !data.departure_date ||
+                            !data.package_id ||
+                            !data.available_slots ||
+                            processing
+                        }
                         onClick={handleSubmit}
                         variant="contained"
                         color="primary"

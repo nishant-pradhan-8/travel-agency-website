@@ -2,19 +2,18 @@ import ActivityCard from '@/components/admin/activities/activityList';
 import ActivityDialog from '@/components/admin/activities/ActivityDialog';
 import AdminLayout from '@/layouts/admin/admin-layout';
 import { activity, SharedProps } from '@/types/types';
-import { usePage } from '@inertiajs/react';
+import { usePage, useForm } from '@inertiajs/react';
 import { Button, InputAdornment, TextField } from '@mui/material';
 import { Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import useDialog from '@/hooks/useDialog';
-import axios from 'axios';
 
 export default function Activities({ activities }: { activities: activity[] }) {
-    const { env } = usePage<SharedProps>().props;
-    const [newActivities, setNewActivities] = useState<activity[]>(activities.sort((a,b)=>new Date(b.created_at).getDate() - new Date(a.created_at).getDate()));
+
     const [selectedActivity, setSelectedActivity] = useState<activity | undefined>();
     const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
     const { open, handleClickOpen, handleClose } = useDialog();
+    const { delete: inertiaDelete } = useForm();
 
     const handleOpenCreateDialog = () => {
         setDialogMode('create');
@@ -28,28 +27,24 @@ export default function Activities({ activities }: { activities: activity[] }) {
         handleClickOpen();
     };
 
-    const handleSaveActivity = (updatedActivity: activity) => {
-        if (dialogMode === 'create') {
-            setNewActivities([ updatedActivity,...newActivities]);
-        } else {
-            setNewActivities(newActivities.map(act => 
-                act.id === updatedActivity.id ? updatedActivity : act
-            ));
-        }
+    const handleDeleteActivity = (activityToDelete: activity) => {
+        inertiaDelete(
+            route('activities.destroy', activityToDelete.id),
+            {
+                onSuccess: () => {
+                    window.alert('Activity deleted successfully');
+                },
+                onError: () => {
+                    window.alert('Failed to delete activity');
+                },
+                preserveState: false,
+            }
+        );
     };
 
-    const handleDeleteActivity = (activityToDelete: activity) => {
-        axios
-            .delete(`${env.APP_URL}/api/activity/${activityToDelete.id}`)
-            .then(function (res) {
-                setNewActivities(newActivities.filter(act => act.id !== activityToDelete.id));
-                window.alert(res.data.message);
-            })
-            .catch(function (err) {
-                window.alert(err.response.data.message);
-            });
-    };
-    
+    // Sort activities by created_at
+    const sortedActivities = [...activities].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
     return (
         <div className="p-6">
             <div className="mb-6 flex items-center justify-between">
@@ -77,7 +72,7 @@ export default function Activities({ activities }: { activities: activity[] }) {
             </div>
 
             <div className="flex flex-col gap-4">
-                {newActivities.map((act) => (
+                {sortedActivities.map((act) => (
                     <div key={act.id}>
                         <ActivityCard 
                             activity={act} 
@@ -93,7 +88,6 @@ export default function Activities({ activities }: { activities: activity[] }) {
                 onClose={handleClose}
                 mode={dialogMode}
                 activity={selectedActivity}
-                onSave={handleSaveActivity}
             />
         </div>
     );

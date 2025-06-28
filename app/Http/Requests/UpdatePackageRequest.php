@@ -24,13 +24,13 @@ class UpdatePackageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'destination_id' => ['sometimes', 'exists:destinations,id'],
+            'destination_id' => ['sometimes','exists:destinations,id'],
             'activity_id' => ['sometimes', 'exists:activities,id'],
             'name' => ['sometimes', 'string', 'max:255'],
             'price' => ['sometimes', 'numeric', 'min:0'],
             'description' => ['sometimes', 'string'],
             'duration' => ['sometimes', 'string', 'max:255'],
-            'image' => ['sometimes', 'image', 'mimes:jpg,jpeg,png,svg', 'max:5242880'],
+            'image' => ['sometimes','nullable', 'image', 'mimes:jpg,jpeg,png,svg', 'max:5242880'],
             'discount' => ['sometimes', 'integer', 'min:0', 'max:100'],
         ];
     }
@@ -40,14 +40,5 @@ class UpdatePackageRequest extends FormRequest
 
 
 
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422)
-        );
-    }
+  
 }

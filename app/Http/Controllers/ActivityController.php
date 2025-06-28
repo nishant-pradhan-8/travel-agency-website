@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDARequest;
+use App\Http\Requests\UpdateDARequest;
 use App\Models\Activity;
 use App\Models\Package;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -29,9 +32,18 @@ class ActivityController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreDARequest $request)
     {
-        //
+        try {
+            $validated = $request->validated();
+          Activity::create($validated);
+            return redirect()->back()->with('success', 'Activity created successfully');
+       
+        } catch (Exception $e) { 
+            return redirect()->back()->withErrors([
+                'server' => 'Something went wrong. Please try again.',
+            ]);
+        }
     }
 
     /**
@@ -62,9 +74,19 @@ class ActivityController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Activity $activity)
+    public function update(UpdateDARequest $request, Activity $activity)
     {
-        //
+        
+        try {
+            $validated = $request->validated();
+            $activity->update($validated);
+            return redirect()->back()->with('success', 'Activity updated successfully');
+       
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors([
+                'server' => 'Something went wrong. Please try again.',
+            ]);
+        }
     }
 
     /**
@@ -72,6 +94,14 @@ class ActivityController extends Controller
      */
     public function destroy(Activity $activity)
     {
-        //
+        try {
+            $activity->delete();
+            return redirect()->back()->with('success', 'Activity deleted successfully');
+       
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors([
+                'server' => 'Something went wrong. Please try again.',
+            ]);
+        }
     }
 }

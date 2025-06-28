@@ -1,22 +1,22 @@
-import { Departure, Package } from "@/types/types";
-import { useAppContext } from "@/contexts/appContext";
-import { FormEvent, useEffect } from "react";
-import { router } from "@inertiajs/react";
+import { Departure, Package, FormData } from "@/types/types";
+import { FormEvent } from "react";
+import { InertiaFormProps } from "@inertiajs/react";
+
 interface BookingPreferenceProps {
   packageInfo: Package;
   departures: Departure[];
+  form: InertiaFormProps<FormData>;
 }
 
-export default function BookingPreference({ packageInfo, departures }: BookingPreferenceProps) {
+export default function BookingPreference({ packageInfo, departures, form }: BookingPreferenceProps) {
 
-  const { form } = useAppContext();
   const { data, setData, post, processing, errors } = form;
 
   const handleSubmit = (e: FormEvent) => {
 
     
      e.preventDefault();
-    const selectedSlot:Departure | null = departures.find(dep=>Number(dep.id)===data.departureId) || null;
+    const selectedSlot:Departure | null = departures.find(dep=>Number(dep.id)===data.departure_id) || null;
   
     if(!selectedSlot){
 
@@ -25,18 +25,18 @@ export default function BookingPreference({ packageInfo, departures }: BookingPr
 
     const availableSlot = selectedSlot.available_slots;
 
-    if (data.noOfPeople > Number(availableSlot)) {
+    if (data.number_of_person > Number(availableSlot)) {
       return window.alert(`Not enough available spots for the selected departure.`);
     }
 
-   
-    const basePrice = Number(packageInfo.price);
-    const baseDiscount = Number(packageInfo.discount);
-    const totalPrice = (basePrice * data.noOfPeople) - (baseDiscount * basePrice * data.noOfPeople / 100);
-
-    setData('totalPrice', totalPrice);
+    // The totalPrice is already calculated and set by BookingDetails component
+    // No need to recalculate here
     
-    post(route('package.booking.store', { package: packageInfo.id }));
+    post(route('package.booking.store', { package: packageInfo.id }),{
+      onError: () => {
+        window.alert('Something went wrong. Please Try again');
+    }
+    });
   };
 
 
@@ -63,30 +63,30 @@ export default function BookingPreference({ packageInfo, departures }: BookingPr
        
 
         <div className="mb-6">
-          <label htmlFor="noOfPeople" className="block text-gray-700 text-sm font-medium mb-2">
+          <label htmlFor="number_of_person" className="block text-gray-700 text-sm font-medium mb-2">
             Number of People
           </label>
           <input
             type="number"
-            id="noOfPeople"
+            id="number_of_person"
             placeholder="e.g. 3"
             min={1}
-            value={data.noOfPeople}
-            onChange={e => setData('noOfPeople', Number(e.target.value))}
+            value={data.number_of_person}
+            onChange={e => setData('number_of_person', Number(e.target.value))}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           />
-          {errors.noOfPeople && <p className="text-red-600 text-sm mt-1">{errors.noOfPeople}</p>}
+          {errors.number_of_person && <p className="text-red-600 text-sm mt-1">{errors.number_of_person}</p>}
         </div>
 
         <div className="mb-6">
-          <label htmlFor="departureDate" className="block text-gray-700 text-sm font-medium mb-2">
+          <label htmlFor="departure_id" className="block text-gray-700 text-sm font-medium mb-2">
             Departure Dates
           </label>
           <select
           required
-            id="departureDate"
-            value={data.departureId || ''}
-            onChange={e => setData('departureId', Number(e.target.value))}
+            id="departure_id"
+            value={data.departure_id || ''}
+            onChange={e => setData('departure_id', Number(e.target.value))}
             className="w-full p-4 border border-gray-300 rounded-xl cursor-pointer"
           >
             <option value="" disabled>
@@ -98,7 +98,7 @@ export default function BookingPreference({ packageInfo, departures }: BookingPr
               </option>
             ))}
           </select>
-          {errors.departure && <p className="text-red-600 text-sm mt-1">{errors.departure}</p>}
+          {errors.departure_id && <p className="text-red-600 text-sm mt-1">{errors.departure_id}</p>}
         </div>
 
         <div className="mb-6">

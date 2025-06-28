@@ -131,8 +131,7 @@ export default function BookingsTable({ bookings }: BookingsTableProps) {
                     booking={selectedBooking}
                     handleClose={handleClose}
                     open={open}
-                    bookingHistory={bookingHistory}
-                    setBookingHistory={setBookingHistory}
+                 
                 />
             )}
         </>

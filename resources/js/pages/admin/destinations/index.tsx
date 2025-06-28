@@ -2,7 +2,7 @@ import DestinationCard from '@/components/admin/destinations/destinationList';
 import DestinationDialog from '@/components/admin/destinations/DestinationDialog';
 import AdminLayout from '@/layouts/admin/admin-layout';
 import { destination, SharedProps } from '@/types/types';
-import { usePage } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { Button, InputAdornment, TextField } from '@mui/material';
 import { Plus, Search } from 'lucide-react';
 import { useState } from 'react';
@@ -11,10 +11,10 @@ import axios from 'axios';
 
 export default function Destinations({ destinations }: { destinations: destination[] }) {
     const { env } = usePage<SharedProps>().props;
-    const [newDestinations, setNewDestinations] = useState<destination[]>(destinations.sort((a,b)=>new Date(b.created_at).getDate() - new Date(a.created_at).getDate()));
     const [selectedDestination, setSelectedDestination] = useState<destination | undefined>();
     const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
     const { open, handleClickOpen, handleClose } = useDialog();
+    const { delete: inertiaDelete } = useForm();
 
     const handleOpenCreateDialog = () => {
         setDialogMode('create');
@@ -28,28 +28,23 @@ export default function Destinations({ destinations }: { destinations: destinati
         handleClickOpen();
     };
 
-    const handleSaveDestination = (updatedDestination: destination) => {
-        if (dialogMode === 'create') {
-            setNewDestinations([updatedDestination,...newDestinations]);
-        } else {
-            setNewDestinations(newDestinations.map(dest => 
-                dest.id === updatedDestination.id ? updatedDestination : dest
-            ));
-        }
-    };
-
     const handleDestinationDelete = (destinationToDelete: destination) => {
-        axios
-            .delete(`${env.APP_URL}/api/destination/${destinationToDelete.id}`)
-            .then(function (res) {
-                setNewDestinations(newDestinations.filter(dest => dest.id !== destinationToDelete.id));
-                window.alert(res.data.message);
-            })
-            .catch(function (err) {
-                window.alert(err.response.data.message);
-            });
+        inertiaDelete(
+            route('destinations.destroy', destinationToDelete.id),
+            {
+                onSuccess: () => {
+                   window.alert('Destination deleted successfully');
+                },
+                onError: () => {
+                    window.alert('Failed to delete destination');
+                },
+                preserveState: false,
+            }
+        );
     };
     
+    const sortedDestinations = [...destinations].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
     return (
         <div className="p-6">
             <div className="mb-6 flex items-center justify-between">
@@ -77,7 +72,7 @@ export default function Destinations({ destinations }: { destinations: destinati
             </div>
 
             <div className="flex flex-col gap-4">
-                {newDestinations.map((dest) => (
+                {sortedDestinations.map((dest) => (
                     <div key={dest.id}>
                         <DestinationCard 
                             destination={dest} 
@@ -93,7 +88,7 @@ export default function Destinations({ destinations }: { destinations: destinati
                 onClose={handleClose}
                 mode={dialogMode}
                 destination={selectedDestination}
-                onSave={handleSaveDestination}
+            
             />
         </div>
     );

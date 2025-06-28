@@ -4,7 +4,6 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 import { AppProvider } from './contexts/appContext';
-import axios from 'axios';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -32,5 +31,3 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
-axios.defaults.withCredentials = true;
-axios.defaults.withXSRFToken = true;

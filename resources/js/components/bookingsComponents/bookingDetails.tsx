@@ -1,10 +1,16 @@
-import { useAppContext } from "@/contexts/appContext";
 import { Package, FormData } from "@/types/types";
+import { InertiaFormProps } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 
-export default function BookingDetails({packageInfo}:{packageInfo:Package}){
-   const { form } = useAppContext();
-  const { data, setData, post, processing, errors } = form;
+interface BookingDetailsProps {
+  packageInfo: Package;
+  data: FormData;
+  form: InertiaFormProps<FormData>;
+}
+
+export default function BookingDetails({packageInfo, data, form}: BookingDetailsProps){
+
+  const { setData } = form;
   const [groupDiscount, setGroupDiscount] = useState<number>(0);
   const [totalCost, setTotalCost] = useState<number>(Number(packageInfo.price));
 
@@ -21,28 +27,28 @@ export default function BookingDetails({packageInfo}:{packageInfo:Package}){
 
   function calcTotalCost(): void {
 
-    const noOfPeople = data.noOfPeople;
+    const noOfPeople = data.number_of_person;
     if(noOfPeople===0){
       return
     }
     const basePrice = Number(packageInfo.price);
     const baseDiscount = Number(packageInfo.discount);
-    const groupDiscountAmount = calcGroupDiscount(data.noOfPeople);
+    const groupDiscountAmount = calcGroupDiscount(data.number_of_person);
 
     setGroupDiscount(groupDiscountAmount);
 
-    const total = (basePrice * data.noOfPeople) - (baseDiscount + groupDiscountAmount);
+    const total = (basePrice * data.number_of_person) - (baseDiscount + groupDiscountAmount);
     setTotalCost(Math.round(total));
  
   }
 
   useEffect(() => {
     calcTotalCost();
-  }, [data.noOfPeople, packageInfo]);
+  }, [data.number_of_person, packageInfo]);
 
   useEffect(()=>{
-    setData('totalPrice',totalCost);
-    console.log(totalCost);
+    setData('totalPrice',Math.round(Number(totalCost)));
+ 
   },[totalCost]);
 
       return (

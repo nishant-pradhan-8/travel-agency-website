@@ -199,21 +199,7 @@
     .swiper-button-prev::after {
         @apply hidden;
     }
-    .activity-div-1 {
-        grid-area: 1 / 1 / 2 / 2;
-    }
-    .activity-div-2 {
-        grid-area: 1 / 2 / 2 / 4;
-    }
-    .activity-div-3 {
-        grid-area: 2 / 1 / 3 / 2;
-    }
-    .activity-div-4 {
-        grid-area: 2 / 2 / 3 / 3;
-    }
-    .activity-div-5 {
-        grid-area: 2 / 3 / 3 / 4;
-    }
+  
 }
 
 .dashboard-parent {

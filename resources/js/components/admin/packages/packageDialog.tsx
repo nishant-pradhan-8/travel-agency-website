@@ -18,12 +18,12 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import { destination, PackageWithRelations, info, Package } from "@/types/types";
-import { usePage } from "@inertiajs/react";
+import { usePage, useForm } from "@inertiajs/react";
 import { PageProps } from "@inertiajs/core";
-import axios from "axios";
 import { SharedProps } from "@/types/types";
 import { FaCamera } from "react-icons/fa";
 import { useAppContext } from '@/contexts/appContext';
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -37,53 +37,61 @@ interface PackageDialogProps {
   open: boolean;
   onClose: () => void;
   package: PackageWithRelations | undefined;
-  onSave: (packageData: Partial<PackageWithRelations>) => void;
   destinations: Partial<info[]> | null;
   activities: Partial<info[]> | null;
   mode: 'create' | 'edit' |'view';
+  onSave: () => void;
+  form: any; // Inertia form object
+  setData: (key: string, value: any) => void;
+  post: (url: string, options?: any) => void;
+  processing: boolean;
+  errors: any;
 }
-
 
 const PackageDialog: React.FC<PackageDialogProps> = ({ 
   open, 
   onClose, 
   package: packageInfo, 
-  onSave,
   destinations,
   activities,
-  mode
+  mode,
+  onSave,
+  form,
+  setData,
+  post,
+  processing,
+  errors
 }) => {
 const {APP_URL} = useAppContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [formData, setFormData] = useState<Partial<Package>>({
-    name: '',
-    description: '',
-    price: '',
-    duration: '',
-    discount: 0,
-    activity_id: undefined,
-    destination_id: undefined
-  });
   const [isEditMode, setIsEditMode] = useState(mode === 'edit' || mode === 'create');
   const [previewImg, setPreviewImg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (packageInfo) {
-      setFormData(packageInfo);
-    } else {
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-        duration: '',
-        discount: 0,
-        activity_id: undefined,
-        destination_id: undefined
-      });
+    if (packageInfo && mode !== 'create') {
+      // Set form data when package is selected for edit/view
+      setData('name', packageInfo.name || '');
+      setData('description', packageInfo.description || '');
+      setData('price', packageInfo.price || '');
+      setData('duration', packageInfo.duration || '');
+      setData('discount', packageInfo.discount || 0);
+      setData('activity_id', packageInfo.activity_id || '');
+      setData('destination_id', packageInfo.destination_id || '');
+      setData('image', null);
+    } else if (mode === 'create') {
+      // Reset form for create mode
+      setData('name', '');
+      setData('description', '');
+      setData('price', '');
+      setData('duration', '');
+      setData('discount', 0);
+      setData('activity_id', '');
+      setData('destination_id', '');
+      setData('image', null);
     }
     setIsEditMode(mode === 'edit' || mode === 'create');
-  }, [packageInfo, mode]);
+  }, [packageInfo, mode, setData]);
 
   useEffect(() => {
     if (!open) {
@@ -95,10 +103,7 @@ const {APP_URL} = useAppContext();
     e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: any } }
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setData(name, value);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,10 +129,7 @@ const {APP_URL} = useAppContext();
       reader.onloadend = () => {
         const base64String = reader.result as string;
         setPreviewImg(base64String);
-        setFormData(prev => ({
-          ...prev,
-          image: file
-        }));
+        setData('image', file);
       };
       reader.readAsDataURL(file);
     }
@@ -141,16 +143,15 @@ const {APP_URL} = useAppContext();
 
   const handleSubmit = () => {
     setIsEditMode(false);
-    onSave(formData);
+    onSave(); 
   };
 
-  const isFormValid = formData.name?.trim() !== '' && 
-                     formData.description?.trim() !== '' && 
-                     formData.price && 
-                     formData.duration && 
-                     formData.activity_id && 
-                     formData.destination_id 
-
+  const isFormValid = form.data.name?.trim() !== '' && 
+                     form.data.description?.trim() !== '' && 
+                     form.data.price && 
+                     form.data.duration && 
+                     form.data.activity_id && 
+                     form.data.destination_id;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -177,12 +178,9 @@ const {APP_URL} = useAppContext();
               onClick={handleImageClick}
             >
               <div className={`overlay  bg-[#8080809e] absolute top-0 left-0 w-full h-full ${isEditMode && 'hidden'}`}></div>
-              {formData.image ? (
+              {form.data.image || packageInfo?.image ? (
                 <img 
-              
-           src={previewImg?previewImg:typeof formData.image === 'string'
-      ? `${APP_URL}/storage/${formData.image}`
-      : ''}
+                  src={previewImg || (packageInfo?.image ? `${APP_URL}/storage/${packageInfo.image}` : '')}
                   alt="Package preview" 
                   className="w-full h-full object-cover"
                 />
@@ -205,45 +203,52 @@ const {APP_URL} = useAppContext();
           <TextField
             name="name"
             label="Package Name"
-            value={formData.name || ''}
+            value={form.data.name || ''}
             onChange={handleChange}
             fullWidth
             disabled={!isEditMode}
             required
+            error={!!errors.name}
+            helperText={errors.name}
           />
           <TextField
             name="price"
             label="Price"
-            value={formData.price || ''}
+            value={form.data.price || ''}
             onChange={handleChange}
             fullWidth
             disabled={!isEditMode}
             required
+            error={!!errors.price}
+            helperText={errors.price}
           />
           <TextField
             name="duration"
             label="Duration"
-            value={formData.duration || ''}
+            value={form.data.duration || ''}
             onChange={handleChange}
             fullWidth
             disabled={!isEditMode}
             required
+            error={!!errors.duration}
+            helperText={errors.duration}
           />
           <TextField
             name="discount"
             label="Discount"
             type="number"
-            
-            value={formData.discount || ''}
+            value={form.data.discount || ''}
             onChange={handleChange}
             fullWidth
             disabled={!isEditMode}
+            error={!!errors.discount}
+            helperText={errors.discount}
           />
-          <FormControl fullWidth>
+          <FormControl fullWidth error={!!errors.activity_id}>
             <InputLabel>Activity</InputLabel>
             <Select
               name="activity_id"
-              value={formData.activity_id || ''}
+              value={form.data.activity_id || ''}
               onChange={handleChange}
               label="Activity"
               disabled={!isEditMode}
@@ -256,11 +261,11 @@ const {APP_URL} = useAppContext();
               ))}
             </Select>
           </FormControl>
-          <FormControl fullWidth>
+          <FormControl fullWidth error={!!errors.destination_id}>
             <InputLabel>Destination</InputLabel>
             <Select
               name="destination_id"
-              value={formData.destination_id || ''}
+              value={form.data.destination_id || ''}
               onChange={handleChange}
               label="Destination"
               disabled={!isEditMode}
@@ -276,7 +281,7 @@ const {APP_URL} = useAppContext();
           <TextField
             name="description"
             label="Description"
-            value={formData.description || ''}
+            value={form.data.description || ''}
             onChange={handleChange}
             multiline
             rows={8}
@@ -284,6 +289,8 @@ const {APP_URL} = useAppContext();
             className="col-span-2"
             disabled={!isEditMode}
             required
+            error={!!errors.description}
+            helperText={errors.description}
           />
         </div>
       </DialogContent>
@@ -294,9 +301,9 @@ const {APP_URL} = useAppContext();
             onClick={handleSubmit} 
             variant="contained" 
             color="primary"
-            disabled={!isFormValid}
+            disabled={!isFormValid || processing}
           >
-            {mode === 'create' ? 'Create Package' : 'Save Changes'}
+            {processing ? 'Saving...' : (mode === 'create' ? 'Create Package' : 'Save Changes')}
           </Button>
         )}
       </DialogActions>

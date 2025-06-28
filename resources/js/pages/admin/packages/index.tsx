@@ -2,167 +2,126 @@ import PackageCard from '@/components/admin/packages/packageCard';
 import PackageDialog from '@/components/admin/packages/packageDialog';
 import useDialog from '@/hooks/useDialog';
 import AdminLayout from '@/layouts/admin/admin-layout';
-import { info, PackageWithRelations, SharedProps } from '@/types/types';
-import { usePage } from '@inertiajs/react';
+import { activity, destination, info, PackageWithRelations, SharedProps } from '@/types/types';
+import { usePage, useForm } from '@inertiajs/react';
 import { Button, InputAdornment, TextField } from '@mui/material';
-import axios from 'axios';
 import { Plus, Search } from 'lucide-react';
 import { ReactNode, useState } from 'react';
 import { useAppContext } from '@/contexts/appContext';
 
-export default function Packages({ packages }: { packages: PackageWithRelations[] }) {
+export default function Packages({ packages, destinations, activities }: { packages: PackageWithRelations[], destinations:destination[], activities:activity[] }) {
     const {APP_URL} = useAppContext();
     const { open, handleClickOpen, handleClose } = useDialog();
     const [packageList, setPackageList] = useState<PackageWithRelations[]>(
         [...packages].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
     );
     const [selectedPackage, setSelectedPackage] = useState<PackageWithRelations>();
-    const [destinations, setDestinations] = useState<Partial<info[]> | null>(null);
-    const [activities, setActivities] = useState<Partial<info[]> | null>(null);
     const [isCreateMode, setIsCreateMode] = useState(false);
 
-    const getAdditionalInfo = async () => {
-        try {
-
-            const [destinationsRes, activitiesRes] = await Promise.all([
-                axios.get(`${APP_URL}/api/destination`),
-                axios.get(`${APP_URL}/api/activity`),
-            ]);
-
-            const destinations: Partial<info[]> = destinationsRes.data.data;
-            const activities: Partial<info[]> = activitiesRes.data.data;
-
-            setDestinations(destinations);
-            setActivities(activities);
-        } catch (error) {
-            console.error('Failed to fetch additional info:', error);
-        }
-    };
-
+    // Inertia form for package operations
+    const { data, setData, post, put, delete: destroy, processing, errors, reset } = useForm({
+        name: '',
+        description: '',
+        price: '',
+        duration: '',
+        discount: 0,
+        activity_id: '',
+        destination_id: '',
+        image: null as File | null,
+        _method: isCreateMode?'POST':'PUT'
+    });
 
     const handleOpenPackageInfo = async (packageInfo: PackageWithRelations) => {
-        if(!destinations || !activities){
-  await getAdditionalInfo();
-        }
-      
         setSelectedPackage(packageInfo);
         setIsCreateMode(false);
         handleClickOpen();
     };
 
     const handleAddPackage = async () => {
-        await getAdditionalInfo();
         setSelectedPackage(undefined);
         setIsCreateMode(true);
+        reset(); // Reset form for new package
         handleClickOpen();
     };
 
     const handleDialogClose = () => {
         setSelectedPackage(undefined);
         setIsCreateMode(false);
+        reset(); // Reset form when closing
         handleClose();
     };
 
-const deletePackage = (selectedPackage: PackageWithRelations): void => {
+    const deletePackage = (selectedPackage: PackageWithRelations): void => {
         let confirmDelete = window.confirm(`Do you want to delete the package ${selectedPackage.name}?`);
         if (confirmDelete) {
-            axios
-                .delete(`${APP_URL}/api/package/${selectedPackage.id}`)
-                .then(() => {
+            destroy(route('packages.destroy', selectedPackage.id), {
+                onSuccess: () => {
                     window.alert(`Package Deleted Successfully`);
-                    const newPackageList: PackageWithRelations[] = packageList.filter((pac) => pac.id !== selectedPackage.id);
-                    setPackageList(newPackageList);
-                })
-                .catch((e) => {
-                    console.log(e);
-                    const msg = e.response?.data?.message || 'An unexpected error occurred.';
+
+                },
+                onError: (errors) => {
+                    console.log(errors);
+                    const msg = errors.message || 'An unexpected error occurred.';
                     window.alert(msg);
-                });
+                },
+                preserveState: false
+            });
         }
     };
 
-    const handleSavePackage = async (packageData: Partial<PackageWithRelations>) => {
-        try {
-            const formData = new FormData();
+    const handleSavePackage = () => {
+        if (isCreateMode) {
+            // Create new package
+            post('/admin/packages', {
+                onSuccess: () => {
+                  
+                    window.alert('Package created successfully');
+                    handleDialogClose();
+                },
+                onError: (errors) => {
+                    console.error('Create error:', errors);
+                    window.alert('Failed to create package. Please try again.');
+                },
+                forceFormData: true,
+                preserveState: false,
+            });
+        } else {
+            // Update existing package
+            if (!selectedPackage) return;
 
-            if (isCreateMode) {
-                Object.entries(packageData).forEach(([key, value]) => {
-                    if (key !== 'image' && value !== null && value !== undefined) {
-                        formData.append(key, value.toString());
-                    }
-                });
-
-                if (packageData.image instanceof File) {
-                    formData.append('image', packageData.image);
+            // Only send changed fields
+            const changedData: any = {};
+            Object.entries(data).forEach(([key, value]) => {
+                if (key !== 'image' && value !== null && value !== undefined && value !== '' && 
+                    selectedPackage[key as keyof PackageWithRelations] !== value) {
+                    changedData[key] = value;
                 }
+            });
 
-                await axios
-                    .post(`${APP_URL}/api/package`, formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    })
-                    .then((response) => {
-                        setPackageList(
-                            [...packageList, response.data.data].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
-                        );
-                        window.alert(response.data.message);
-                    });
-            } else  {
-                Object.entries(packageData).forEach(([key, value]) => {
-                    if (
-                        key !== 'image' &&
-                        value !== null &&
-                        value !== undefined &&
-                        value !== '' &&
-                        selectedPackage && 
-                        selectedPackage[key as keyof PackageWithRelations] !== value
-                    ) {
-                    
-                        formData.append(key, value.toString());
-                    }
-                });
-
-                if (packageData.image instanceof File) {
-                    formData.append('image', packageData.image);
-                }
-
-                if ([...formData.entries()].length === 0) {
-                    window.alert('Please edit at least one field');
-                    return;
-                }
-
-                try {
-                    if(!selectedPackage){
-                        return
-                    }
-                    const response = await axios.post(`${APP_URL}/api/package/${selectedPackage.id}?_method=PUT`, formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    });
-
-                    const newPackageList = packageList
-                        .map((pac) => {
-                            if (pac.id === selectedPackage.id) {
-                                return response.data.data;
-                            }
-                            return pac;
-                        })
-                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-                    setPackageList(newPackageList);
-                    window.alert(response.data.message);
-                } catch (error) {
-                    console.error('Update error:', error);
-                    window.alert('Failed to update package. Please try again.');
-                }
+            // Add image if it's a File
+            if (data.image instanceof File) {
+                changedData.image = data.image;
             }
 
-            handleDialogClose();
-        } catch (error) {
-            console.error('Failed to save package:', error);
-            window.alert('Failed to save package. Please try again.');
+            if (Object.keys(changedData).length === 0) {
+                window.alert('Please edit at least one field');
+                return;
+            }
+
+            post(route(`packages.update`,selectedPackage.id), {
+          
+                onSuccess: () => {
+                  
+                    window.alert('Package updated successfully');
+                    handleDialogClose();
+                },
+                onError: (errors) => {
+                    console.error('Update error:', errors);
+                    window.alert('Failed to update package. Please try again.');
+                },
+                forceFormData: true,
+                preserveState: false
+            });
         }
     };
 
@@ -202,10 +161,15 @@ const deletePackage = (selectedPackage: PackageWithRelations): void => {
                 open={open}
                 onClose={handleDialogClose}
                 package={selectedPackage}
-                onSave={handleSavePackage}
                 destinations={destinations}
                 activities={activities}
                 mode={isCreateMode ? 'create' : 'view'}
+                onSave={handleSavePackage}
+                form={{ data, setData, post, put, processing, errors }}
+                setData={setData}
+                post={post}
+                processing={processing}
+                errors={errors}
             />
         </div>
     );

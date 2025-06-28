@@ -1,11 +1,10 @@
 import { User } from '@/types/types';
+import { useForm } from '@inertiajs/react';
 import { IconButton, Menu, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
-import axios from 'axios';
 import { MoreHorizontal } from 'lucide-react';
-import { useState } from 'react';
-import { useAppContext } from '@/contexts/appContext';
+import { useEffect, useState } from 'react';
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
         backgroundColor: theme.palette.common.black,
@@ -30,11 +29,15 @@ interface UsersTableProps {
 }
 
 export default function UsersTable({ users }: UsersTableProps) {
-    const [userList, setUserList] = useState<User[]>(users)
-    const { APP_URL } = useAppContext();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [updating, setUpdating] = useState<boolean>(false)
+    const { data,setData,post, delete:InertiaDelete,patch, processing } = useForm();
+    useEffect(()=>{
+        setData({
+              account_status: selectedUser?.account_status === 'active' ? 'blocked' : 'active'
+        })
+    },[selectedUser])
+
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, user: User) => {
         setAnchorEl(event.currentTarget);
         setSelectedUser(user);
@@ -44,40 +47,49 @@ export default function UsersTable({ users }: UsersTableProps) {
         setAnchorEl(null);
     };
 
-    const handleEditClick = async() => {
+    const handleEditClick = async () => {
+        if (!selectedUser) {
+            return;
+        }
+      
+
+        const confirm = window.confirm(`Do you want to ${selectedUser.account_status === 'active' ? 'block' : 'unblock'} the user ${selectedUser.full_name}?`);
+        if (confirm) {
+        console.log(data)
         
-        if(!selectedUser){
-            return
+            patch(route('users.update', selectedUser.id), {
+                onSuccess: () => {
+                    window.alert('User status updated successfully');
+                },
+                onError: () => {
+                    window.alert('Unable to update. Please Try again');
+                },
+                preserveState: false,
+            });
+            handleMenuClose();
+            
         }
-        const body = {
-            'account_status': selectedUser.account_status==="active"?"blocked":'active'
-        }
-        setUpdating(true)
-        await axios
-        .post(`${APP_URL}/api/user/${selectedUser.id}?_method=PUT`, body)
-        .then((response) => {
-            window.alert(response.data.message);
-            const newUserList:User[] = userList.map((u)=>{
-                if(u.id===selectedUser.id){
-                    return response.data.data
-                }else{
-                    return u;
-                }
-            })
-        }).catch((e)=>{
-            const errorMsg = e.response.data.message || "Unable to update. Please Try again"
-            window.alert(errorMsg)
-        }).finally(()=>{
-            setUpdating(false)
-        });
-
-
-        handleMenuClose();
     };
 
     const handleDeleteClick = () => {
-        // Handle delete user logic here
-        console.log('Delete user:', selectedUser);
+        if (!selectedUser) {
+            return;
+        }
+        const confirm = window.confirm(`Do you want to delete user ${selectedUser.full_name}?`);
+        if(!confirm){
+            return
+        }
+       InertiaDelete(route('users.destroy',selectedUser.id), {
+        onSuccess: () => {
+            window.alert('User deleted successfully');
+        },
+        onError: () => {
+            window.alert('Unable to delete. Please Try again');
+        },
+        preserveState: false,
+    })
+     
+  
         handleMenuClose();
     };
 
@@ -102,7 +114,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                             <StyledTableCell align="center" className="border-r-[1px] border-gray-300 !bg-teal-800 py-1">
                                 Address
                             </StyledTableCell>
-                           
+
                             <StyledTableCell align="center" className="border-r-[1px] border-gray-300 !bg-teal-800 py-1">
                                 Joined Date
                             </StyledTableCell>
@@ -115,14 +127,14 @@ export default function UsersTable({ users }: UsersTableProps) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {userList.map((user) => (
+                        {users.map((user) => (
                             <StyledTableRow key={user.id}>
                                 <TableCell align="center">#{user.id}</TableCell>
                                 <TableCell align="center">{user.full_name}</TableCell>
                                 <TableCell align="center">{user.email}</TableCell>
                                 <TableCell align="center">{user.phone}</TableCell>
                                 <TableCell align="center">{user.address}</TableCell>
-                              
+
                                 <TableCell align="center">{user.created_at.split('T')[0]}</TableCell>
                                 <TableCell align="center">{user.account_status}</TableCell>
                                 <TableCell align="center">
@@ -137,8 +149,12 @@ export default function UsersTable({ users }: UsersTableProps) {
             </TableContainer>
 
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-                <MenuItem disabled={updating} onClick={handleEditClick}>{selectedUser?.account_status==='active'?"Block":"Unblock"}</MenuItem>
-                <MenuItem onClick={handleDeleteClick} className="text-red-600">Delete User</MenuItem>
+                <MenuItem disabled={processing} onClick={handleEditClick}>
+                    {selectedUser?.account_status === 'active' ? 'Block' : 'Unblock'}
+                </MenuItem>
+                <MenuItem onClick={handleDeleteClick} className="text-red-600">
+                    Delete User
+                </MenuItem>
             </Menu>
         </>
     );

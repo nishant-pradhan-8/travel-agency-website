@@ -1,6 +1,6 @@
 import { useAppContext } from '@/contexts/appContext';
 import useDialog from '@/hooks/useDialog';
-import { Departure, info } from '@/types/types';
+import { Departure, info, Package } from '@/types/types';
 import { Button, Chip, IconButton, Menu, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
@@ -8,7 +8,7 @@ import { MoreHorizontal, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import DepartureEditDialog from './editDepartureDialog';
 import AddDepartureDialog from './addDepartureDialog';
-import axios from 'axios';
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -35,10 +35,10 @@ interface BookingsTableProps {
     departures: Departure[];
     addOpen: boolean;
     handleAddClose: () => void;
+    packages: info[]
 }
 
-export default function DepartureTable({ departures, addOpen, handleAddClose }: BookingsTableProps) {
-    const {APP_URL} = useAppContext();
+export default function DepartureTable({ departures, addOpen, handleAddClose, packages }: BookingsTableProps) {
     const [departureHistory, setDepartureHistory] = useState<Departure[]>([...departures].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
     const { open: editOpen, handleClickOpen: handleEditOpen, handleClose: handleEditClose } = useDialog();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -63,11 +63,9 @@ export default function DepartureTable({ departures, addOpen, handleAddClose }: 
 
     useEffect(()=>{
         if(!packageList){
-          axios.get(`${APP_URL}/api/package`).then((res)=>{
-           
-            setPackageList(res.data.data)
-          })
-        }
+         setPackageList(packages)
+          }
+        
    
       },[])
 
@@ -123,8 +121,7 @@ export default function DepartureTable({ departures, addOpen, handleAddClose }: 
                     departure={selectedDeparture}
                     handleClose={handleEditClose}
                     open={editOpen}
-                    departureHistory={departureHistory}
-                    setDepartureHistory={setDepartureHistory}
+                    
                     packageList = {packageList}
                 />
             )}
@@ -132,8 +129,6 @@ export default function DepartureTable({ departures, addOpen, handleAddClose }: 
             <AddDepartureDialog
                 handleClose={handleAddClose}
                 open={addOpen}
-                departureHistory={departureHistory}
-                setDepartureHistory={setDepartureHistory}
                 packageList = {packageList}
             />
         </>

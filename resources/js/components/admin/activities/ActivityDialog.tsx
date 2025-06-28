@@ -1,9 +1,8 @@
 import { activity, SharedProps } from '@/types/types';
-import { usePage } from '@inertiajs/react';
+import { usePage, useForm } from '@inertiajs/react';
 import CloseIcon from '@mui/icons-material/Close';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
 import React from 'react';
 import { useAppContext } from '@/contexts/appContext';
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -18,6 +17,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 interface ActivityFormData {
   name: string;
   description: string;
+  [key:string]:any;
 }
 
 interface ActivityDialogProps {
@@ -25,91 +25,59 @@ interface ActivityDialogProps {
   onClose: () => void;
   mode: 'create' | 'edit';
   activity?: activity;
-  onSave: (data: activity) => void;
 }
 
-const ActivityDialog: React.FC<ActivityDialogProps> = ({ open, onClose, mode, activity, onSave }) => {
-  const {APP_URL} = useAppContext();
-  const [formData, setFormData] = React.useState<ActivityFormData>({
-    name: activity?.name || '',
-    description: activity?.description || '',
+const ActivityDialog: React.FC<ActivityDialogProps> = ({ open, onClose, mode, activity }) => {
+  const { data, setData, post, patch, processing, errors, reset } = useForm<ActivityFormData>({
+    name: '',
+    description: '',
   });
 
   React.useEffect(() => {
     if (mode === "edit" && activity) {
-      setFormData({
+      setData({
         name: activity.name,
         description: activity.description,
       });
-    }else if (mode === "create") {
-      setFormData({
-          name: '',
-          description: '',
-      });
-  }
-  }, [activity, mode]);
+    } else if (mode === "create") {
+      reset();
+    }
+  }, [activity, mode, setData, reset]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setData(name as keyof ActivityFormData, value);
   };
 
   const handleSubmit = () => {
     if (mode === 'create') {
-      axios
-        .post(`${APP_URL}/api/activity`, formData, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(function (res) {
-          onSave(res.data.data);
+      post(route('activities.store'), {
+        onSuccess: () => {
           onClose();
-          window.alert(res.data.message);
-        })
-        .catch(function (err) {
-          window.alert(err.response.data.message);
-        });
-    } else {
-      const reqBody: Partial<ActivityFormData> = {};
-      
-      if (activity && formData.name !== activity.name) {
-        reqBody.name = formData.name;
-      }
-      if (activity && formData.description !== activity.description) {
-        reqBody.description = formData.description;
-      }
-
-      if (Object.keys(reqBody).length > 0) {
-        axios
-          .patch(`${APP_URL}/api/activity/${activity?.id}`, reqBody, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          })
-          .then(function (res) {
-            onSave({ ...activity, ...formData } as activity);
-            onClose();
-            window.alert(res.data.message);
-          })
-          .catch(function (err) {
-            window.alert(err.response.data.message);
-          });
-      } else {
-        onClose();
-      }
+          window.alert('Activity created successfully');
+        },
+        onError: () => {
+          window.alert('Failed to create activity');
+        },
+        preserveState: false,
+      });
+    } else if (mode === 'edit' && activity) {
+      patch(route('activities.update', activity.id), {
+        onSuccess: () => {
+          onClose();
+          window.alert('Activity updated successfully');
+        },
+        onError: () => {
+          window.alert('Failed to update activity');
+        },
+        preserveState: false,
+      });
     }
   };
 
-  const isFormValid = formData.name.trim() !== '' && formData.description.trim() !== '';
+  const isFormValid = data.name.trim() !== '' && data.description.trim() !== '';
   const isEditMode = mode === 'edit';
-  const hasChanges = isEditMode && activity && (
-    formData.name !== activity.name || 
-    formData.description !== activity.description
-  );
+  const hasChanges = isEditMode && activity && (data.name !== activity.name || data.description !== activity.description);
 
   return (
     <BootstrapDialog onClose={onClose} aria-labelledby="customized-dialog-title" open={open} maxWidth="sm" fullWidth>
@@ -134,7 +102,7 @@ const ActivityDialog: React.FC<ActivityDialogProps> = ({ open, onClose, mode, ac
             fullWidth
             label="Activity Name"
             name="name"
-            value={formData.name}
+            value={data.name}
             onChange={handleInputChange}
             variant="outlined"
             required
@@ -143,7 +111,7 @@ const ActivityDialog: React.FC<ActivityDialogProps> = ({ open, onClose, mode, ac
             fullWidth
             label="Description"
             name="description"
-            value={formData.description}
+            value={data.description}
             onChange={handleInputChange}
             multiline
             rows={4}
@@ -154,7 +122,12 @@ const ActivityDialog: React.FC<ActivityDialogProps> = ({ open, onClose, mode, ac
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary" disabled={!isFormValid || (isEditMode && !hasChanges)}>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          color="primary"
+          disabled={!isFormValid || (isEditMode && !hasChanges) || processing}
+        >
           {isEditMode ? 'Save Changes' : 'Create'}
         </Button>
       </DialogActions>

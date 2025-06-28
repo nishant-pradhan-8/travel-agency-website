@@ -1,5 +1,5 @@
 import { BookingHistory, SharedProps } from '@/types/types';
-import { usePage } from '@inertiajs/react';
+import { usePage, useForm } from '@inertiajs/react';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
@@ -12,9 +12,7 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useAppContext } from '@/contexts/appContext';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -38,10 +36,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 export default function BookingHistoryTable({ bookings }: { bookings: BookingHistory[] }) {
    
-    const [ bookingHistory, setBookingHistory ] = useState<BookingHistory[]>(bookings.sort((a,b)=>new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
-    const { env } = usePage<SharedProps>().props;
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [selectedBooking, setSelectedBooking] = useState<number | null>(null);
+
+    const {data,setData, patch, processing } = useForm();
 
     const handleMenuClick = (event: React.MouseEvent<HTMLElement>, bookingId: number) => {
         setAnchorEl(event.currentTarget);
@@ -53,28 +51,31 @@ export default function BookingHistoryTable({ bookings }: { bookings: BookingHis
         setSelectedBooking(null);
     };
 
+    useEffect(()=>{
+        setData({
+            booking_status: "cancelled",
+        
+      })
+    },[selectedBooking])
+
     const handleCancelBooking = () => {
-        axios
-            .patch(`${env.APP_URL}:8000/api/booking/${selectedBooking}`,{
-                'booking_status': 'cancelled'
-            })
-            .then(function (res) {
-                const updatedBookingHistory: BookingHistory[] = bookingHistory.map((booking) => {
-                    if (booking.id === selectedBooking) {
-                        return { ...booking, booking_status: 'cancelled' };
-                    }
-                    return booking;
-                });
-                setBookingHistory(updatedBookingHistory.sort((a,b)=>new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
-                 window.alert(res.data.message);
-            })
-            .catch(function (error) {
-                window.alert(error);
-            });
+        if (!selectedBooking) return;
+
+        patch(route('booking.update', { booking: selectedBooking }), {
+           
+            onSuccess: () => {
+                window.alert('Booking cancelled successfully');
+            },
+            onError: (errors) => {
+                window.alert('Failed to cancel booking. Please try again.');
+            },
+            preserveState:false
+        });
         handleMenuClose();
     };
 
-  
+    // Sort bookings by creation date (newest first)
+    const sortedBookings = bookings.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     return (
         <TableContainer component={Paper}>
@@ -111,7 +112,7 @@ export default function BookingHistoryTable({ bookings }: { bookings: BookingHis
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {bookingHistory.map((row) => (
+                    {sortedBookings.map((row) => (
                         <StyledTableRow key={row.id}>
                             <StyledTableCell align="center">{row.id}</StyledTableCell>
                             <StyledTableCell align="center">{row.package.name}</StyledTableCell>
@@ -122,7 +123,11 @@ export default function BookingHistoryTable({ bookings }: { bookings: BookingHis
                             <StyledTableCell align="center">{row.booking_status}</StyledTableCell>
                             <StyledTableCell align="center">{row.created_at.split('T')[0]}</StyledTableCell>
                             <StyledTableCell align="center">
-                                <IconButton onClick={(e) => handleMenuClick(e, row.id)} size="small">
+                                <IconButton 
+                                    onClick={(e) => handleMenuClick(e, row.id)} 
+                                    size="small"
+                                    disabled={processing}
+                                >
                                     <MoreVertIcon />
                                 </IconButton>
                             </StyledTableCell>
@@ -130,8 +135,11 @@ export default function BookingHistoryTable({ bookings }: { bookings: BookingHis
                     ))}
                 </TableBody>
                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} className="shadow-none">
-                    <MenuItem disabled={bookings.find((b) => b.id === selectedBooking)?.booking_status === 'cancelled'} onClick={handleCancelBooking}>
-                        Cancel Booking
+                    <MenuItem 
+                        disabled={bookings.find((b) => b.id === selectedBooking)?.booking_status === 'cancelled' || processing} 
+                        onClick={handleCancelBooking}
+                    >
+                        {processing ? 'Cancelling...' : 'Cancel Booking'}
                     </MenuItem>
                 </Menu>
             </Table>

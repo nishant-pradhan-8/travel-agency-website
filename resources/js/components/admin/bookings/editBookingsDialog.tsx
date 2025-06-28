@@ -1,5 +1,5 @@
 import { BookingHistory, SharedProps } from '@/types/types';
-import { usePage } from '@inertiajs/react';
+import { usePage, useForm } from '@inertiajs/react';
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import Button from '@mui/material/Button';
@@ -9,7 +9,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
-import axios from 'axios';
 import * as React from 'react';
 
 import { useAppContext } from '@/contexts/appContext';
@@ -28,71 +27,52 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 interface EditBooking {
     payment_status: 'paid' | 'refunded' | 'unpaid';
     booking_status: 'cancelled' | 'booked';
-    [key: string]: string;
+    [key: string]: any;
 }
 
 export default function BookingEditDialog({
     booking,
     handleClose,
     open,
-    bookingHistory,
-    setBookingHistory,
+   
 }: {
     booking: BookingHistory;
     handleClose: () => void;
     open: boolean;
-    bookingHistory: BookingHistory[];
-    setBookingHistory: React.Dispatch<React.SetStateAction<BookingHistory[]>>;
+  
 }) {
     const {APP_URL} = useAppContext();
 
-    const [updateDetails, setUpdateDetails] = React.useState<EditBooking>({
+    const { data, setData, patch, processing, errors } = useForm<EditBooking>({
         payment_status: booking.payment_status || '',
         booking_status: booking.booking_status || '',
     });
 
     const handleSelectChange = (event: SelectChangeEvent<string>) => {
         const { name, value } = event.target;
-        setUpdateDetails((val) => ({ ...val, [name]: value }));
+        setData(name, value)
     };
 
     const handleSubmit = () => {
-        let reqBody: Partial<EditBooking> = {};
-        if (updateDetails.booking_status !== booking.booking_status) {
-            reqBody['booking_status'] = updateDetails.booking_status;
-        }
-        if (updateDetails.payment_status !== booking.payment_status) {
-            reqBody['payment_status'] = updateDetails.payment_status;
-        }
-
-        axios
-            .patch(`${APP_URL}/api/booking/${booking.id}`, reqBody)
-            .then(function (res) {
-                const updatedBookingHistory: BookingHistory[] = bookingHistory.map((book) => {
-                    if (booking.id === book.id) {
-                        return { ...booking, ...updateDetails};
-                    }
-                    return book;
-                });
-                setBookingHistory(updatedBookingHistory);
-              
-                window.alert(res.data.message);
-            })
-            .catch(function (err) {
-                window.alert(err.response.data.message);
-            }).finally(()=>{
+        patch(route('bookings.update', booking.id), {
+            onSuccess: () => {
+                window.alert('Booking updated successfully');
                 handleClose();
-            })
-
-     
+            },
+            onError: () => {
+                window.alert('Failed to update booking');
+            },
+            preserveState: false,
+        });
     };
 
-    React.useEffect(()=>{
-        setUpdateDetails({
+    React.useEffect(() => {
+        setData({
             payment_status: booking.payment_status || '',
             booking_status: booking.booking_status || '',
         });
-    },[booking])
+    }, [booking]);
+
     return (
         <React.Fragment>
             <BootstrapDialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open} maxWidth="sm" fullWidth>
@@ -115,7 +95,7 @@ export default function BookingEditDialog({
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <FormControl fullWidth>
                             <InputLabel>Payment Status</InputLabel>
-                            <Select name="payment_status" value={updateDetails.payment_status} label="Payment Status" onChange={handleSelectChange}>
+                            <Select name="payment_status" value={data.payment_status} label="Payment Status" onChange={handleSelectChange}>
                                 {paymentStatuses.map((status) => (
                                     <MenuItem key={status} value={status}>
                                         {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -126,7 +106,7 @@ export default function BookingEditDialog({
 
                         <FormControl fullWidth>
                             <InputLabel>Booking Status</InputLabel>
-                            <Select name="booking_status" value={updateDetails.booking_status} label="Booking Status" onChange={handleSelectChange}>
+                            <Select name="booking_status" value={data.booking_status} label="Booking Status" onChange={handleSelectChange}>
                                 {bookingStatuses.map((status) => (
                                     <MenuItem key={status} value={status}>
                                         {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -139,7 +119,7 @@ export default function BookingEditDialog({
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
                     <Button
-                        disabled={booking.booking_status === updateDetails.booking_status && booking.payment_status === updateDetails.payment_status}
+                        disabled={(booking.booking_status === data.booking_status && booking.payment_status === data.payment_status) || processing}
                         onClick={handleSubmit}
                         variant="contained"
                         color="primary"

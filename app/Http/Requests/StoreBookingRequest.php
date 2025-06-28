@@ -22,8 +22,8 @@ class StoreBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'noOfPeople'=>['required','integer', 'min:1'],
-            'departureId' => ['required', 'exists:departures,id'],
+            'number_of_person'=>['required','integer', 'min:1'],
+            'departure_id' => ['required', 'exists:departures,id'],
             'messege' => ['nullable', 'string', 'max:500'],
             'totalPrice' => ['required', 'integer']
         ];

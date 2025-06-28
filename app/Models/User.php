@@ -26,7 +26,8 @@ class User extends Authenticatable
         'phone',
         'address',
         'profile_picture',
-        'isAdmin'
+        'isAdmin',
+        'account_status'
     ];
 
     /**

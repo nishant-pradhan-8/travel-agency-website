@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDARequest;
+use App\Http\Requests\UpdateDARequest;
 use App\Models\Destination;
 use App\Models\Package;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -25,15 +28,25 @@ class DestinationController extends Controller
      */
     public function create()
     {
-        //
+       
+
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreDARequest $request)
     {
-        //
+        try {
+            $validated = $request->validated();
+           Destination::create($validated);
+            return redirect()->back()->with('success', 'Destination created successfully');
+       
+        } catch (Exception $e) { 
+            return redirect()->back()->withErrors([
+                'server' => 'Something went wrong. Please try again.',
+            ]);
+        }
     }
 
     /**
@@ -61,9 +74,18 @@ class DestinationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Destination $destination)
+    public function update(UpdateDARequest $request, Destination $destination)
     {
-        //
+        try {
+            $validated = $request->validated();
+            $destination->update($validated);
+            return redirect()->back()->with('success', 'Destination updated successfully');
+       
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors([
+                'server' => 'Something went wrong. Please try again.',
+            ]);
+        }
     }
 
     /**
@@ -71,6 +93,15 @@ class DestinationController extends Controller
      */
     public function destroy(Destination $destination)
     {
-        //
+        try {
+            $destination->delete();
+            return redirect()->back()->with('success', 'Destination deleted successfully');
+       
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors([
+                'server' => 'Something went wrong. Please try again.',
+            ]);
+        }
+
     }
 }

@@ -7,7 +7,7 @@ import { ReactNode } from "react"
 
 
 export default function BookingHistory({bookings}:{bookings:BookingHistory[]}){
-    console.log(bookings, 'bookings')
+
     return(
         <>
             <BookingsHero />

@@ -25,30 +25,10 @@ class UpdateDARequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => "sometimes | string",
-            'description' => "sometimes | string",
+            'name' => "required | string",
+            'description' => "required | string",
         ];
     }
    
 
-  public function withValidator($validator)
-{
-    $validator->after(function ($validator) {
-        if (!request()->has('name') && !request()->has('description')) {
-            $validator->errors()->add('fields', 'Invalid Field or At least one field must be provided');
-        }
-    });
-}
-
-
-     protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422)
-        );
-    }
 }

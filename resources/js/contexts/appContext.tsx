@@ -2,10 +2,8 @@ import { BookingHistory, FormData, info, SharedProps } from '@/types/types';
 import { useForm, usePage } from '@inertiajs/react';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 
-type FormType = ReturnType<typeof useForm<FormData>>;
-
 interface AppContextType {
-  form: FormType;
+  
   APP_URL: string;
 }
 
@@ -18,15 +16,9 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const APP_URL:string = 'http://localhost:8000';
  
-  const form = useForm<FormData>({
-    noOfPeople: 1,
-    departureId: null,
-    messege: '',
-    totalPrice:null
-  });
 
   return (
-    <AppContext.Provider value={{ form, APP_URL }}>
+    <AppContext.Provider value={{ APP_URL }}>
       {children}
     </AppContext.Provider>
   );
